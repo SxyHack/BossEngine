@@ -1,6 +1,7 @@
 #include "WinExtras.h"
 #include "undocument.h"
 #include <psapi.h>
+#include <QtDebug>
 
 WinExtras::WinExtras()
 	: QObject(nullptr)
@@ -20,6 +21,34 @@ BOOL WinExtras::AdjustPrivilege()
 	}
 
 	return _DebugPrivilege;
+}
+
+BOOL WinExtras::EnableDebugPrivilege(BOOL bEnable)
+{
+	// 附给本进程特权，以便访问系统进程
+	BOOL bOk = FALSE;
+	HANDLE hToken;
+
+	// 打开一个进程的访问令牌
+	if (::OpenProcessToken(::GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES, &hToken))
+	{
+		// 取得特权名称为“SetDebugPrivilege”的LUID
+		LUID uID;
+		::LookupPrivilegeValue(NULL, SE_DEBUG_NAME, &uID);
+
+		// 调整特权级别
+		TOKEN_PRIVILEGES tp;
+		tp.PrivilegeCount = 1;
+		tp.Privileges[0].Luid = uID;
+		tp.Privileges[0].Attributes = bEnable ? SE_PRIVILEGE_ENABLED : 0;
+		::AdjustTokenPrivileges(hToken, FALSE, &tp, sizeof(tp), NULL, NULL);
+		bOk = (::GetLastError() == ERROR_SUCCESS);
+
+		// 关闭访问令牌句柄
+		::CloseHandle(hToken);
+	}
+
+	return bOk;
 }
 
 HWND WinExtras::QueryWindowHandle(DWORD dwTargetPID)
@@ -107,7 +136,91 @@ QString WinExtras::FormatLastError(DWORD lastErr)
 #endif
 }
 
-BOOL WinExtras::QueryProcessModules(IN HANDLE hProcess)
+QString WinExtras::FormatMemoryProtection(DWORD value)
+{
+	if (value == 0)
+		return "PAGE_CALLER_NOT_ACCESS(0)";
+
+	QString qsFormat;
+
+	if (value & PAGE_EXECUTE)
+		qsFormat += "PAGE_EXECUTE|";
+	if (value & PAGE_EXECUTE_READ)
+		qsFormat += "PAGE_EXECUTE_READ|";
+	if (value & PAGE_EXECUTE_READWRITE)
+		qsFormat += "PAGE_EXECUTE_READWRITE|";
+	if (value & PAGE_EXECUTE_WRITECOPY)
+		qsFormat += "PAGE_EXECUTE_WRITECOPY|";
+	if (value & PAGE_NOACCESS)
+		qsFormat += "PAGE_NOACCESS|";
+	if (value & PAGE_READONLY)
+		qsFormat += "PAGE_READONLY|";
+	if (value & PAGE_READWRITE)
+		qsFormat += "PAGE_READWRITE|";
+	if (value & PAGE_WRITECOPY)
+		qsFormat += "PAGE_WRITECOPY|";
+	if (value & PAGE_TARGETS_INVALID)
+		qsFormat += "PAGE_TARGETS_INVALID|";
+	if (value & PAGE_GUARD)
+		qsFormat += "PAGE_GUARD|";
+	if (value & PAGE_NOCACHE)
+		qsFormat += "PAGE_NOCACHE|";
+	if (value & PAGE_WRITECOMBINE)
+		qsFormat += "PAGE_WRITECOMBINE|";
+
+	if (qsFormat.isEmpty())
+		qsFormat = QString("PAGE_PROTECT_ERROR(0x%1)").arg(value, 0, 16);
+	else
+		qsFormat = qsFormat.left(qsFormat.length() - 1); // 删除最后一个'|'
+
+	return qsFormat;
+}
+
+QString WinExtras::FormatMemoryState(DWORD state)
+{
+	QString qsFormat;
+	if (state & MEM_COMMIT)
+		qsFormat += "MEM_COMMIT|";
+	if (state & MEM_FREE)
+		qsFormat += "MEM_FREE|";
+	if (state & MEM_RESERVE)
+		qsFormat += "MEM_RESERVE|";
+
+	if (qsFormat.isEmpty())
+		qsFormat = QString("MEM_STATE_ERROR(0x%1)").arg(state, 0, 16);
+	else
+		qsFormat = qsFormat.left(qsFormat.length() - 1); // 删除最后一个'|'
+
+	return qsFormat;
+	//switch (state)
+	//{
+	//case 0x1000: return "MEM_COMMIT";
+	//case 0x10000: return "MEM_FREE";
+	//case 0x2000: return "MEM_RESERVE";
+	//default: return QString("MEM_STATE_ERROR(0x%1)").arg(state, 0, 16);
+	//}
+}
+
+QString WinExtras::FormatMemoryType(DWORD value)
+{
+	QString qsFormat;
+
+	if (value & MEM_IMAGE)
+		qsFormat += "MEM_TYPE_IMAGE|";
+	if (value & MEM_MAPPED)
+		qsFormat += "MEM_TYPE_MAPPED|";
+	if (value & MEM_PRIVATE)
+		qsFormat += "MEM_TYPE_PRIVATE|";
+
+	if (qsFormat.isEmpty())
+		qsFormat = QString("MEM_TYPE_ERROR(0x%1)").arg(value, 0, 16);
+	else
+		qsFormat = qsFormat.left(qsFormat.length() - 1); // 删除最后一个'|'
+
+	return qsFormat;
+}
+
+BOOL WinExtras::EnumProcessModulesNT(IN HANDLE hProcess)
 {
 	DWORD cbBytesNeeded = 0;
 	EnumProcessModulesEx(hProcess, NULL, 0, &cbBytesNeeded, LIST_MODULES_ALL);
@@ -143,7 +256,7 @@ BOOL WinExtras::QueryProcessModules(IN HANDLE hProcess)
 }
 
 
-BOOL WinExtras::QueryProcessModulesTH(IN DWORD dwPID, OUT LIST_MODULE& modules)
+BOOL WinExtras::EnumProcessModulesTH(IN DWORD dwPID, OUT LIST_MODULE& modules)
 {
 	BOOL ret = FALSE;
 	MODULEENTRY32 moduleEntry = { 0 };
@@ -167,6 +280,49 @@ BOOL WinExtras::QueryProcessModulesTH(IN DWORD dwPID, OUT LIST_MODULE& modules)
 	CloseHandle(hSnap);
 
 	return !modules.isEmpty();
+}
+
+BOOL WinExtras::QueryProcessMemory(HANDLE hProcess, ULONG_PTR lpAddress, LIST_MEMORY& results)
+{
+	MEMORY_BASIC_INFORMATION mbi = { 0 };
+	ULONG_PTR ulQueryAddr = lpAddress;
+
+	while (::VirtualQueryEx(hProcess, (LPCVOID)ulQueryAddr, &mbi, sizeof(MEMORY_BASIC_INFORMATION)))
+	{
+		ulQueryAddr += mbi.RegionSize;
+		auto qsAllocMemProtect = FormatMemoryProtection(mbi.AllocationProtect);
+		auto qsMemProtect = FormatMemoryProtection(mbi.Protect);
+		auto qsMemState = FormatMemoryState(mbi.State);
+		auto qsMemType = FormatMemoryType(mbi.Type);
+
+		TCHAR szModName[MAX_PATH];
+		auto size = sizeof(szModName) / sizeof(TCHAR);
+		::GetModuleFileNameEx(hProcess, (HMODULE)mbi.AllocationBase, szModName, size);
+
+		qDebug("Memory(%d): %p %u %s %s %s %s", 
+			mbi.PartitionId, 
+			mbi.BaseAddress, 
+			mbi.RegionSize,
+			qsAllocMemProtect.toUtf8().data(),
+			qsMemProtect.toUtf8().data(), 
+			qsMemState.toUtf8().data(), 
+			qsMemType.toUtf8().data()
+		);
+
+		qDebug() << QString::fromWCharArray(szModName);
+	}
+
+	//auto error = GetLastError();
+	//auto message = FormatLastError(error);
+	//qDebug("VirtualQueryEx Failed. ERROR:%d %s", error, message.toUtf8().data());
+	return TRUE;
+}
+
+QString WinExtras::GetSystemDir()
+{
+	TCHAR szPath[512] = { 0 };
+	UINT nSize = GetSystemDirectory(szPath, 512);
+	return QString::fromWCharArray(szPath, nSize);
 }
 
 //BOOL WinExtras::QueryProcessInformation(HANDLE hProcess)

@@ -7,7 +7,8 @@
 #include <tlhelp32.h>
 
 #include "WinExtras.h"
-#include "struct/BEWorkspace.h"
+
+#include "core/model/BEWorkspace.h"
 #include "provider/VirtualMemoryProvider.h"
 
 class BEngine : public QObject
@@ -31,11 +32,35 @@ public:
 	// 打开进程, 准备扫描或者读写
 	// 
 	BOOL OpenProcess(DWORD pid);
+	HANDLE GetProcessHandle();
+	//////////////////////////////////////////////////////////////////////////
 	// 
 	// 枚举打开进程的所有模块, 需要先调用 OpenProcess.
 	//
 	BOOL EnumModules();
+	LIST_MODULE& GetModules();
+	//
+	// 将模块添加到_IncludeModules数组, 用来在搜索内容线程中使用
+	//
+	void IncludeModule(const MODULEENTRY32& mod);
+	//
+	// 清空 _IncludeModules 数组
+	//
+	void RemoveIncludeModules();
+	LIST_MODULE& GetIncludeModules();
+	//////////////////////////////////////////////////////////////////////////
+	//
+	// 获取所有模块的总字节数
+	//
+	DWORD64 GetModulesSize();
+	//
+	// 枚举进程的内存块
+	//
+	BOOL EnumVirtualMemory();
 
+	//
+	// 获取GetLastError返回值
+	//
 	DWORD GetLastErrorCode();
 	QString GetLastErrorMessage();
 
@@ -58,6 +83,7 @@ private:
 	DWORD          _AttachProcessID;
 	HANDLE         _AttachProcessHandle;
 	LIST_MODULE    _AttachProcessModules;
+	LIST_MODULE    _IncludeModules;
 	DWORD          _LastErrorCode;
 	QString        _LastErrorMessage;
 	LIST_WORKSPACE _Workspaces;

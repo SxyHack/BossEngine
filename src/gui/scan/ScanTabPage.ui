@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1033</width>
-    <height>650</height>
+    <width>1025</width>
+    <height>668</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,34 +15,34 @@
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout_5">
    <item>
-    <widget class="QTreeWidget" name="treeWidget">
+    <widget class="QTableWidget" name="tableWidget">
      <property name="font">
       <font>
        <family>Sarasa UI SC</family>
       </font>
      </property>
-     <property name="columnCount">
-      <number>3</number>
+     <property name="alternatingRowColors">
+      <bool>true</bool>
      </property>
-     <column>
-      <property name="text">
-       <string notr="true">1</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string notr="true">2</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string notr="true">3</string>
-      </property>
-     </column>
+     <property name="selectionMode">
+      <enum>QAbstractItemView::MultiSelection</enum>
+     </property>
+     <property name="selectionBehavior">
+      <enum>QAbstractItemView::SelectRows</enum>
+     </property>
+     <attribute name="verticalHeaderVisible">
+      <bool>false</bool>
+     </attribute>
     </widget>
    </item>
    <item>
     <widget class="QFrame" name="frame">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>350</height>
+      </size>
+     </property>
      <property name="maximumSize">
       <size>
        <width>400</width>
@@ -55,12 +55,24 @@
       </font>
      </property>
      <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
+      <enum>QFrame::NoFrame</enum>
      </property>
      <property name="frameShadow">
       <enum>QFrame::Raised</enum>
      </property>
      <layout class="QFormLayout" name="formLayout_2">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
       <item row="0" column="0">
        <widget class="QLabel" name="Placehold1">
         <property name="font">
@@ -160,6 +172,24 @@
         </layout>
        </widget>
       </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="ScanValueLabel">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>32</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Sarasa UI SC</family>
+         </font>
+        </property>
+        <property name="text">
+         <string>数值:</string>
+        </property>
+       </widget>
+      </item>
       <item row="1" column="1">
        <widget class="QFrame" name="frame_3">
         <property name="frameShape">
@@ -195,7 +225,7 @@
             </font>
            </property>
            <property name="maxLength">
-            <number>100</number>
+            <number>999999999</number>
            </property>
           </widget>
          </item>
@@ -213,11 +243,29 @@
             </font>
            </property>
            <property name="maxLength">
-            <number>100</number>
+            <number>999999999</number>
            </property>
           </widget>
          </item>
         </layout>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_2">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>32</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Sarasa UI SC</family>
+         </font>
+        </property>
+        <property name="text">
+         <string>数值类型:</string>
+        </property>
        </widget>
       </item>
       <item row="2" column="1">
@@ -382,7 +430,7 @@
         </property>
        </spacer>
       </item>
-      <item row="5" column="0" colspan="2">
+      <item row="6" column="0" colspan="2">
        <widget class="QGroupBox" name="FrameMemory">
         <property name="font">
          <font>
@@ -391,7 +439,7 @@
          </font>
         </property>
         <property name="title">
-         <string>内存设置</string>
+         <string>模块参数</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -402,145 +450,20 @@
         <property name="checkable">
          <bool>false</bool>
         </property>
-        <layout class="QFormLayout" name="formLayout">
+        <layout class="QVBoxLayout" name="verticalLayout">
          <property name="leftMargin">
-          <number>0</number>
+          <number>3</number>
+         </property>
+         <property name="topMargin">
+          <number>3</number>
          </property>
          <property name="rightMargin">
+          <number>3</number>
+         </property>
+         <property name="bottomMargin">
           <number>0</number>
          </property>
-         <item row="0" column="0">
-          <widget class="QLabel" name="label_3">
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>32</height>
-            </size>
-           </property>
-           <property name="font">
-            <font>
-             <family>Sarasa UI SC</family>
-             <pointsize>9</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>模块:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <layout class="QHBoxLayout" name="horizontalLayout_3">
-           <item>
-            <widget class="QLineEdit" name="ModuleSelected">
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>32</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <family>Sarasa UI SC</family>
-               <pointsize>9</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>ALL</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="ModuleSelectBtn">
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>32</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <family>Sarasa UI SC</family>
-               <pointsize>9</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>选择模块</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="label_4">
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>32</height>
-            </size>
-           </property>
-           <property name="font">
-            <font>
-             <family>Sarasa UI SC</family>
-             <pointsize>9</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>开始:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QLineEdit" name="MemoryRngBegin">
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>32</height>
-            </size>
-           </property>
-           <property name="font">
-            <font>
-             <family>Sarasa Mono SC</family>
-             <pointsize>9</pointsize>
-            </font>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="0">
-          <widget class="QLabel" name="label_5">
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>32</height>
-            </size>
-           </property>
-           <property name="font">
-            <font>
-             <family>Sarasa UI SC</family>
-             <pointsize>9</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>结束:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1">
-          <widget class="QLineEdit" name="MemoryRngEnd">
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>32</height>
-            </size>
-           </property>
-           <property name="font">
-            <font>
-             <family>Sarasa Mono SC</family>
-             <pointsize>9</pointsize>
-            </font>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="1">
+         <item>
           <layout class="QHBoxLayout" name="horizontalLayout_4">
            <item>
             <widget class="QCheckBox" name="MemoryWriteable">
@@ -586,81 +509,33 @@
            </item>
           </layout>
          </item>
-         <item row="3" column="0">
-          <widget class="QLabel" name="label_6">
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>32</height>
-            </size>
+         <item>
+          <widget class="QTableWidget" name="ModuleTable">
+           <property name="styleSheet">
+            <string notr="true">font: 9pt &quot;Sarasa UI SC&quot;;</string>
            </property>
-           <property name="font">
-            <font>
-             <family>Sarasa UI SC</family>
-             <pointsize>9</pointsize>
-            </font>
+           <property name="alternatingRowColors">
+            <bool>true</bool>
            </property>
-           <property name="text">
-            <string/>
+           <property name="selectionMode">
+            <enum>QAbstractItemView::MultiSelection</enum>
            </property>
+           <property name="selectionBehavior">
+            <enum>QAbstractItemView::SelectRows</enum>
+           </property>
+           <attribute name="verticalHeaderVisible">
+            <bool>false</bool>
+           </attribute>
+           <attribute name="verticalHeaderShowSortIndicator" stdset="0">
+            <bool>true</bool>
+           </attribute>
           </widget>
          </item>
         </layout>
        </widget>
       </item>
-      <item row="6" column="0" colspan="2">
-       <spacer name="verticalSpacer_2">
-        <property name="font">
-         <font>
-          <family>Sarasa UI SC</family>
-         </font>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>40</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="label_2">
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>32</height>
-         </size>
-        </property>
-        <property name="font">
-         <font>
-          <family>Sarasa UI SC</family>
-         </font>
-        </property>
-        <property name="text">
-         <string>数值类型:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="ScanValueLabel">
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>32</height>
-         </size>
-        </property>
-        <property name="font">
-         <font>
-          <family>Sarasa UI SC</family>
-         </font>
-        </property>
-        <property name="text">
-         <string>数值:</string>
-        </property>
-       </widget>
+      <item row="5" column="0" colspan="2">
+       <widget class="QSpinBox" name="spinBox"/>
       </item>
      </layout>
     </widget>

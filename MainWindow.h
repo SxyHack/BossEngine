@@ -19,6 +19,9 @@ protected:
 
 private slots:
     void onActionOpenProcess();
+    void OnMemoryScanning(qint64 scanned, qint64 total);
+    void OnMemoryScanStarted();
+    void OnMemoryScanDone();
 
 private:
     Ui::MainWindowClass ui;

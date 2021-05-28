@@ -88,7 +88,16 @@
     <ClCompile Include="src\core\model\cmd\BECmd.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\model\cmd\BECmdScan.cpp">
+    <ClCompile Include="src\core\model\cmd\BECmdSearchValue.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\model\define.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\scan\controls\BEHeaderView.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\utility\JsonMaker.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -126,7 +135,10 @@
     <QtMoc Include="src\core\model\cmd\BECmd.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="src\core\model\cmd\BECmdScan.h">
+    <QtMoc Include="src\core\model\cmd\BECmdSearchValue.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="src\gui\scan\controls\BEHeaderView.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
@@ -245,6 +257,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\core\model\define.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\utility\JsonMaker.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

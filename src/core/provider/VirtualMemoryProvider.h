@@ -14,6 +14,6 @@ public:
 
 private:
 	HANDLE _ProcessHandle;
-	DWORD  _ProcessMinAddress;
-	DWORD  _ProcessMaxAddress;
+	ULONG_PTR  _ProcessMinAddress;
+	ULONG_PTR  _ProcessMaxAddress;
 };

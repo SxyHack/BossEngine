@@ -1,8 +1,9 @@
 #include "BEngine.h"
 #include "undocument.h"
+#include <QFileInfo>
 
-Q_DECLARE_METATYPE(PROCESSENTRY32)
-
+Q_DECLARE_METATYPE(PROCESSENTRY32);
+Q_DECLARE_METATYPE(MODULEENTRY32);
 
 BEngine::BEngine() : QObject(nullptr)
 	, _AttachProcessID(0)
@@ -67,7 +68,7 @@ BOOL BEngine::OpenProcess(DWORD pid)
 	//clientID.UniqueThread = 0;
 
 	_AttachProcessID = pid;
-	_AttachProcessHandle = ::OpenProcess(PROCESS_ALL_ACCESS, TRUE, pid);
+	_AttachProcessHandle = ::OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
 	if (_AttachProcessHandle == NULL)
 	{
 		_LastErrorCode = GetLastError();
@@ -76,20 +77,67 @@ BOOL BEngine::OpenProcess(DWORD pid)
 		return FALSE;
 	}
 
+	//SYSTEM_INFO si = { 0 };
+	//::GetSystemInfo(&si);
+	//LIST_MEMORY lstMemory;
+	//_WinExtras.QueryProcessMemory(_AttachProcessHandle, (ULONG_PTR)si.lpMinimumApplicationAddress, lstMemory);
+
 	return EnumModules();
+}
+
+HANDLE BEngine::GetProcessHandle()
+{
+	return _AttachProcessHandle;
 }
 
 BOOL BEngine::EnumModules()
 {
 	_AttachProcessModules.clear();
 	// ²éÑ¯Ä£¿é
-	if (!_WinExtras.QueryProcessModulesTH(_AttachProcessID, _AttachProcessModules))
+	if (!_WinExtras.EnumProcessModulesTH(_AttachProcessID, _AttachProcessModules))
 	{
 		qCritical("QueryProcessModulesTH Failed");
 		return FALSE;
 	}
 
 	return TRUE;
+}
+
+LIST_MODULE& BEngine::GetModules()
+{
+	return _AttachProcessModules;
+}
+
+void BEngine::IncludeModule(const MODULEENTRY32& mod)
+{
+	_IncludeModules.append(mod);
+}
+
+void BEngine::RemoveIncludeModules()
+{
+	_IncludeModules.clear();
+}
+
+LIST_MODULE& BEngine::GetIncludeModules()
+{
+	return _IncludeModules;
+}
+
+DWORD64 BEngine::GetModulesSize()
+{
+	DWORD64 dwSize = 0;
+
+	for (auto& mod : _AttachProcessModules)
+	{
+		dwSize += mod.modBaseSize;
+	}
+
+	return dwSize;
+}
+
+BOOL BEngine::EnumVirtualMemory()
+{
+	return FALSE;
 }
 
 DWORD BEngine::GetLastErrorCode()

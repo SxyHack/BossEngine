@@ -9,8 +9,8 @@ VirtualMemoryProvider::VirtualMemoryProvider()
 	SYSTEM_INFO sysInfo;
 	::GetSystemInfo(&sysInfo);
 
-	_ProcessMinAddress = (DWORD)sysInfo.lpMinimumApplicationAddress;
-	_ProcessMaxAddress = (DWORD)sysInfo.lpMaximumApplicationAddress;
+	_ProcessMinAddress = (ULONG_PTR)sysInfo.lpMinimumApplicationAddress;
+	_ProcessMaxAddress = (ULONG_PTR)sysInfo.lpMaximumApplicationAddress;
 
 }
 

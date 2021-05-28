@@ -1,9 +1,9 @@
 #pragma once
 
-#include <QObject>
 #include <QThread>
+#include <QList>
 
-class BECmd : public QObject, public QThread
+class BECmd : public QThread
 {
 	Q_OBJECT
 
@@ -11,8 +11,12 @@ public:
 	BECmd();
 	~BECmd();
 
-	void run() override;
+	virtual void Stop() = 0;
 
-protected:
+signals:
+	void ES_Done();
+	void ES_Started();
 
 };
+
+typedef QList<BECmd*> LIST_CMD;

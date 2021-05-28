@@ -34,3 +34,9 @@ enum EScanMethod {
 	EScanMethod_Equal,        // 没变动的数值
 	EScanMethod_FirstDiff,    // 对比首次扫描
 };
+
+
+// 
+// 返回EScanValueType的数据长度
+// 
+int GetScanValueTypeSize(EScanValueType type);

@@ -68,7 +68,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>themes\dark\framelesswindow;themes\dark;.\;src\;.\src\core\provider;.\src\core;.\src\gui\scan;.\src\core\struct;.\src\core\model\cmd;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>themes\dark\framelesswindow;themes\dark;.\;src\;.\src\core\provider;.\src\core;.\src\gui\scan;.\src\core\struct;.\src\core\model\cmd;.\src\gui\scan\controls;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <DisableSpecificWarnings>4828</DisableSpecificWarnings>
     </ClCompile>
@@ -78,7 +78,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>themes\dark\framelesswindow;themes\dark;.\;src\;.\src\core\provider;.\src\core;.\src\gui\scan;.\src\core\struct;.\src\core\model\cmd;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>themes\dark\framelesswindow;themes\dark;.\;src\;.\src\core\provider;.\src\core;.\src\gui\scan;.\src\core\struct;.\src\core\model\cmd;.\src\gui\scan\controls;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <DisableSpecificWarnings>4828</DisableSpecificWarnings>
     </ClCompile>
@@ -112,14 +112,17 @@
   <ItemGroup>
     <ClCompile Include="src\core\BEngine.cpp" />
     <ClCompile Include="src\core\model\cmd\BECmd.cpp" />
-    <ClCompile Include="src\core\model\cmd\BECmdScan.cpp" />
+    <ClCompile Include="src\core\model\cmd\BECmdSearchValue.cpp" />
+    <ClCompile Include="src\core\model\define.cpp" />
     <ClCompile Include="src\core\provider\BEProvider.cpp" />
     <ClCompile Include="src\core\provider\VirtualMemoryProvider.cpp" />
     <ClCompile Include="src\core\model\BEWorkspace.cpp" />
     <ClCompile Include="src\gui\process\ProcessAttachDialog.cpp" />
+    <ClCompile Include="src\gui\scan\controls\BEHeaderView.cpp" />
     <ClCompile Include="src\gui\scan\ScanTabPage.cpp" />
     <ClCompile Include="src\log\CustomLogMessageHandler.cpp" />
     <ClCompile Include="src\settings\GlobalSettings.cpp" />
+    <ClCompile Include="src\utility\JsonMaker.cpp" />
     <ClCompile Include="src\utility\Random.cpp" />
     <ClCompile Include="src\WinExtras.cpp" />
     <ClCompile Include="themes\dark\DarkStyle.cpp" />
@@ -185,9 +188,11 @@
     <QtMoc Include="src\core\provider\BEProvider.h" />
     <QtMoc Include="src\core\model\BEWorkspace.h" />
     <QtMoc Include="src\core\model\cmd\BECmd.h" />
-    <QtMoc Include="src\core\model\cmd\BECmdScan.h" />
+    <QtMoc Include="src\core\model\cmd\BECmdSearchValue.h" />
     <ClInclude Include="src\core\model\define.h" />
+    <QtMoc Include="src\gui\scan\controls\BEHeaderView.h" />
     <ClInclude Include="src\undocument.h" />
+    <ClInclude Include="src\utility\JsonMaker.h" />
     <ClInclude Include="src\utility\Random.h" />
     <ClInclude Include="src\utility\utility.h" />
     <QtMoc Include="src\WinExtras.h" />
