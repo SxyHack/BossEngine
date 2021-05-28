@@ -299,9 +299,10 @@ BOOL WinExtras::QueryProcessMemory(HANDLE hProcess, ULONG_PTR lpAddress, LIST_ME
 		auto size = sizeof(szModName) / sizeof(TCHAR);
 		::GetModuleFileNameEx(hProcess, (HMODULE)mbi.AllocationBase, szModName, size);
 
-		qDebug("Memory(%d): %p %u %s %s %s %s", 
+		qDebug("VM(%d): %p %p %u %s %s %s %s", 
 			mbi.PartitionId, 
 			mbi.BaseAddress, 
+			mbi.AllocationBase,
 			mbi.RegionSize,
 			qsAllocMemProtect.toUtf8().data(),
 			qsMemProtect.toUtf8().data(), 

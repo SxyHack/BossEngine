@@ -205,8 +205,10 @@ protected:
 	{
 		if (IsBaseScan)
 		{
+			qDebug("扫描区块:[%p, %p]", MemBegAddress, MemBegAddress + MemRegionSize);
+
 			HandleBaseSearch();
-		} 
+		}
 		else
 		{
 
@@ -244,7 +246,7 @@ void BECmdSearchValue::run()
 	for (auto& mod : modules)
 	{
 		ULONG_PTR ulModBegAddr = (ULONG_PTR)mod.modBaseAddr;
-		ULONG_PTR ulModEndAddr = ulModBegAddr + mod.dwSize;
+		ULONG_PTR ulModEndAddr = ulModBegAddr + mod.modBaseSize;
 		DWORD     dwModSize = mod.modBaseSize;
 		while (ulModBegAddr < ulModEndAddr)
 		{
@@ -261,8 +263,6 @@ void BECmdSearchValue::run()
 			worker->MemRegionSize = dwRealSize;
 			worker->ModuleEntry32 = mod;
 
-			qDebug("扫描区块:");
-
 			_SearchMemoryPool.start(worker);
 			_Workspace->NumberOfScanTotalBytes += dwRealSize;
 
@@ -271,14 +271,14 @@ void BECmdSearchValue::run()
 		}
 
 		auto qsModName = QString::fromWCharArray(mod.szModule);
-		qDebug("模块(%s) %p+%x=%p 加入扫描队列...", qsModName.toUtf8().data(), 
-			mod.modBaseAddr, 
-			mod.modBaseSize, 
+		qDebug("模块(%s) %p+%x=%p 加入扫描队列...", qsModName.toUtf8().data(),
+			mod.modBaseAddr,
+			mod.modBaseSize,
 			mod.modBaseAddr + mod.modBaseSize);
 	}
 
 	emit ES_Started();
-	
+
 	_SearchMemoryPool.waitForDone();
 
 	emit ES_Done();
