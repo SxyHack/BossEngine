@@ -442,5 +442,5 @@ void ScanTabPage::OnMemorySearchDone()
 
 void ScanTabPage::OnTimeScanRefresh()
 {
-	emit ES_MemoryScanning(_Workspace.ScannedBytes, _Workspace.NumberOfScanTotalBytes);
+	emit ES_MemoryScanning(_Workspace.NumberOfScannedBytes, _Workspace.NumberOfScanTotalBytes);
 }

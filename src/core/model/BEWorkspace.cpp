@@ -9,15 +9,15 @@ BEWorkspace::BEWorkspace()
 	, BaseMode(EBaseMode_10)
 	, BaseScan(true)
 	, MemoryCopyOnWrite(false)
-	, MemoryWriteable(true)
-	, MemoryExecuteable(true)
+	, MemoryWritable(true)
+	, MemoryExecutable(true)
 	, NumberOfScanTotalBytes(0)
 {
 	SYSTEM_INFO si;
 	GetSystemInfo(&si);
 	
 	MemBegAddress = (qint64)si.lpMinimumApplicationAddress;
-	ScanEndAddress = (qint64)si.lpMaximumApplicationAddress;
+	MemEndAddress = (qint64)si.lpMaximumApplicationAddress;
 	NumberOfProcessors = si.dwNumberOfProcessors;
 }
 

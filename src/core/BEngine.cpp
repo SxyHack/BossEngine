@@ -77,10 +77,10 @@ BOOL BEngine::OpenProcess(DWORD pid)
 		return FALSE;
 	}
 
-	SYSTEM_INFO si = { 0 };
-	::GetSystemInfo(&si);
-	LIST_MEMORY lstMemory;
-	_WinExtras.QueryProcessMemory(_AttachProcessHandle, (ULONG_PTR)si.lpMinimumApplicationAddress, lstMemory);
+	//SYSTEM_INFO si = { 0 };
+	//::GetSystemInfo(&si);
+	//LIST_MEMORY lstMemory;
+	//_WinExtras.QueryProcessMemory(_AttachProcessHandle, (ULONG_PTR)si.lpMinimumApplicationAddress, lstMemory);
 
 	return EnumModules();
 }

@@ -3,8 +3,10 @@
 #include "BEngine.h"
 
 #include <QRunnable>
-#include <windows.h>
 #include <QVariant>
+
+
+
 
 BECmdSearchValue::BECmdSearchValue(BEWorkspace* ws, const QString& valueA, const QString& valueB) : BECmd()
 , IsBaseScan(ws->BaseScan)
@@ -34,7 +36,7 @@ bool BECmdSearchValue::IsRunning()
 
 void BECmdSearchValue::AddScannedByte(qint32 value)
 {
-	_Workspace->ScannedBytes += value;
+	_Workspace->NumberOfScannedBytes += value;
 }
 
 //
@@ -53,7 +55,7 @@ public:
 		, ScanValueSize(4)
 		, MemRegionSize(0)
 	{
-		ZeroMemory(&ModuleEntry32, sizeof(MODULEENTRY32));
+		ZeroMemory(&MemoryInformation, sizeof(MEMORY_BASIC_INFORMATION));
 	}
 
 	~ScanWorker()
@@ -164,41 +166,44 @@ protected:
 		qint64 nMemEndAddr = MemBegAddress + MemRegionSize;
 
 		qint64 nNumberOfFound = 0;
+		SIZE_T nNumberOfBytesRead = 0;
+		BYTE*  lpBuffer = new BYTE[ScanValueSize];
 
 		while (_Command->IsRunning() && nMemBegAddr < nMemEndAddr)
 		{
-			BYTE* lpBuf = new BYTE[ScanValueSize];
-			SIZE_T nNumberOfBytesRead = 0;
+			ZeroMemory(lpBuffer, ScanValueSize);
 
-			if (!::ReadProcessMemory(hProcess, (LPVOID)nMemBegAddr, lpBuf, ScanValueSize, &nNumberOfBytesRead))
+			if (!::ReadProcessMemory(hProcess, (LPVOID)nMemBegAddr, lpBuffer, ScanValueSize, &nNumberOfBytesRead))
 			{
-				qDebug("[-] 扫描地址: %p", nMemBegAddr);
-				nMemBegAddr += 1;
-				delete[] lpBuf;
+				auto qsProtect = extras.FormatMemoryProtection(MemoryInformation.Protect);
+				auto qsMemType = extras.FormatMemoryType(MemoryInformation.Type);
+				auto qsMemState = extras.FormatMemoryState(MemoryInformation.State);
+				qWarning("无法读取内存:(%p), %s %s %s", nMemBegAddr, 
+					qsProtect.toUtf8().data(), 
+					qsMemType.toUtf8().data(), 
+					qsMemState.toUtf8().data());
+				nMemBegAddr += ScanValueSize;
 				continue;
 			}
 
 			//qDebug("[+] 扫描地址: %p", nMemBegAddr);
 
 			QVariant vMemory;
-			if (CheckMemoryIsMatch(lpBuf, vMemory))
+			if (CheckMemoryIsMatch(lpBuffer, vMemory))
 			{
-				QString qsModName = QString::fromWCharArray(ModuleEntry32.szModule);
-				qDebug("[+] 找到数值: %d(%p) %s", vMemory.toInt(), nMemBegAddr, qsModName.toUtf8().data());
+				qDebug("[+] 找到数值: %d(%p) %s", vMemory.toInt(), nMemBegAddr, ModuleName.toUtf8().data());
 
-				_Command->AddScannedByte(ScanValueSize);
 				// 保存地址, 值, 数据类型等等
-				nMemBegAddr += ScanValueSize;
 			}
 			else
 			{
-				_Command->AddScannedByte(1);
-
-				nMemBegAddr += 1;
 			}
 
-			delete[] lpBuf;
+			_Command->AddScannedByte(ScanValueSize);
+			nMemBegAddr += ScanValueSize;
 		}
+
+		delete[] lpBuffer;
 	}
 
 	void run() override
@@ -206,7 +211,6 @@ protected:
 		if (IsBaseScan)
 		{
 			qDebug("扫描区块:[%p, %p]", MemBegAddress, MemBegAddress + MemRegionSize);
-
 			HandleBaseSearch();
 		}
 		else
@@ -225,7 +229,8 @@ public:
 	qint32          ScanValueSize;
 	qint64          MemBegAddress;
 	qint64          MemRegionSize;
-	MODULEENTRY32   ModuleEntry32;
+	QString         ModuleName;
+	MEMORY_BASIC_INFORMATION MemoryInformation;
 
 private:
 	BECmdSearchValue* _Command;
@@ -233,6 +238,133 @@ private:
 
 
 void BECmdSearchValue::run()
+{
+	const auto nRegionSize = (DWORD64)1024 * 20;
+	const auto numberOfProcessors = qMin(_Workspace->NumberOfProcessors, 10);
+	const auto byteSize = GetScanValueTypeSize(ScanValueType);
+
+	auto hProcess = Engine.GetProcessHandle();
+	_Stopped.storeRelaxed(1); // 设置运行中状态
+	_SearchMemoryPool.setMaxThreadCount(numberOfProcessors);
+	_Workspace->NumberOfScanTotalBytes = 0;
+
+	DWORD64 ulQueryAddr = 0, dwBaseAddr = 0;
+	MEMORY_BASIC_INFORMATION mbi;
+	SIZE_T nMBISize = sizeof(MEMORY_BASIC_INFORMATION);
+	ZeroMemory(&mbi, nMBISize);
+
+
+	while (::VirtualQueryEx(hProcess, (LPCVOID)ulQueryAddr, &mbi, nMBISize))
+	{
+		dwBaseAddr = ulQueryAddr;
+		ulQueryAddr += mbi.RegionSize;
+
+		TCHAR szModName[MAX_PATH];
+		auto size = sizeof(szModName) / sizeof(TCHAR);
+		::GetModuleBaseName(hProcess, (HMODULE)mbi.BaseAddress, szModName, size);
+
+		QString qsModName = QString::fromWCharArray(szModName);
+		if (!CheckIsIncludeModule(qsModName))
+		{
+			continue;
+		}
+
+		if (!CheckIsValidRegion(mbi))
+		{
+			continue;
+		}
+
+		DWORD64 dwBegAddr = dwBaseAddr;
+		DWORD64 dwModSize = mbi.RegionSize;
+		DWORD64 dwEndAddr = dwBaseAddr + dwModSize;
+
+		while (dwBegAddr < dwEndAddr)
+		{
+			auto dwRealSize = qMin(nRegionSize, mbi.RegionSize);
+			auto worker = new ScanWorker(this);
+			worker->IsBaseScan = this->IsBaseScan;
+			worker->ValueA = ValueA;
+			worker->ValueB = ValueB;
+			worker->BaseMode = this->BaseMode;
+			worker->ScanMethod = this->ScanMethod;
+			worker->ScanValueType = this->ScanValueType;
+			worker->ScanValueSize = byteSize;
+			worker->MemBegAddress = dwBegAddr;
+			worker->MemRegionSize = dwRealSize;
+			worker->ModuleName = qsModName;
+			worker->MemoryInformation = mbi;
+
+			_SearchMemoryPool.start(worker);
+			_Workspace->NumberOfScanTotalBytes += dwRealSize;
+
+			qDebug("模块(%s) %p+%x=%p 加入扫描...", qsModName.toUtf8().data(),
+				dwBegAddr, dwRealSize, dwBegAddr + dwRealSize);
+
+			dwBegAddr += dwRealSize;
+			dwModSize -= dwRealSize;
+		}
+	}
+
+	emit ES_Started();
+	_SearchMemoryPool.waitForDone();
+	emit ES_Done();
+}
+
+bool BECmdSearchValue::CheckIsIncludeModule(const QString& modName)
+{
+	for (auto& mod : Engine.GetIncludeModules())
+	{
+		auto qsModName = QString::fromWCharArray(mod.szModule);
+		if (modName.compare(qsModName, Qt::CaseInsensitive) == 0)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool BECmdSearchValue::CheckIsValidRegion(const MEMORY_BASIC_INFORMATION& mbi)
+{
+	bool bValid = false;
+	bool bGuard = mbi.Protect & PAGE_GUARD;
+	bool bNoAccess = mbi.Protect & PAGE_NOACCESS;
+	bool bNoCache = mbi.Protect & PAGE_NOCACHE;
+	bool bWriteCombine = mbi.Protect & PAGE_WRITECOMBINE;
+
+	bValid = (mbi.State == MEM_COMMIT);
+	bValid = bValid && !bGuard;
+	bValid = bValid && !bNoAccess;
+	bValid = bValid && !bNoCache;
+	bValid = bValid && !bWriteCombine;
+	bValid = bValid && mbi.Protect & PAGE_READONLY;
+
+	if (_Workspace->MemoryWritable)
+	{
+		bValid = bValid || mbi.Protect & PAGE_READWRITE;
+		bValid = bValid || mbi.Protect & PAGE_WRITECOPY;
+		bValid = bValid || mbi.Protect & PAGE_EXECUTE_READWRITE;
+		bValid = bValid || mbi.Protect & PAGE_EXECUTE_WRITECOPY;
+	}
+
+	if (_Workspace->MemoryExecutable)
+	{
+		bValid = bValid || mbi.Protect & PAGE_EXECUTE;
+		bValid = bValid || mbi.Protect & PAGE_EXECUTE_READ;
+		bValid = bValid || mbi.Protect & PAGE_EXECUTE_READWRITE;
+		bValid = bValid || mbi.Protect & PAGE_EXECUTE_WRITECOPY;
+	}
+
+	if (_Workspace->MemoryCopyOnWrite)
+	{
+		bValid = bValid || mbi.Protect & PAGE_WRITECOPY;
+		bValid = bValid || mbi.Protect & PAGE_EXECUTE_WRITECOPY;
+	}
+
+	return bValid;
+}
+
+void BECmdSearchValue::EnumVirtualMemoryByModule()
 {
 	const auto nRegionSize = (DWORD)1024 * 20;
 	const auto numberOfProcessors = qMin(_Workspace->NumberOfProcessors, 10);
@@ -261,7 +393,7 @@ void BECmdSearchValue::run()
 			worker->ScanValueSize = byteSize;
 			worker->MemBegAddress = ulModBegAddr;
 			worker->MemRegionSize = dwRealSize;
-			worker->ModuleEntry32 = mod;
+			//worker->ModuleEntry32 = mod;
 
 			_SearchMemoryPool.start(worker);
 			_Workspace->NumberOfScanTotalBytes += dwRealSize;
@@ -282,4 +414,5 @@ void BECmdSearchValue::run()
 	_SearchMemoryPool.waitForDone();
 
 	emit ES_Done();
+
 }

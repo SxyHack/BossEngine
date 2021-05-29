@@ -30,19 +30,19 @@ signals:
 
 public:
 	QString         Name;
-	qint32          UniqueID;
-	EScanValueType  ScanValueType;
-	EScanMethod     ScanMethod;
-	EBaseMode       BaseMode;
-	bool            MemoryWriteable;
-	bool            MemoryExecuteable;
+	qint32          UniqueID;       
+	EScanValueType  ScanValueType;  // 扫描数值的类型, 比如1字节, 2字节等等
+	EScanMethod     ScanMethod;     // 扫描方法
+	EBaseMode       BaseMode;       // 搜索数值的进制形式
+	bool            MemoryWritable;
+	bool            MemoryExecutable;
 	bool            MemoryCopyOnWrite;
-	qint64          MemBegAddress;
-	qint64          ScanEndAddress;
+	bool            BaseScan;       // 是否首次扫描或者被叫做基础扫描
+	qint64          MemBegAddress;  // 弃用参数
+	qint64          MemEndAddress;  // 弃用参数
 	qint32          NumberOfProcessors;
-	bool            BaseScan;
-	qint64          NumberOfScanTotalBytes; // 所有的模块需要扫描的总字节数
-	QAtomicInt      ScannedBytes;      // 扫描过的字节数
+	qint64          NumberOfScanTotalBytes;    // 所有的模块需要扫描的总字节数
+	QAtomicInt      NumberOfScannedBytes;      // 扫描过的字节数
 
 private:
 	QThreadPool    _SearchMemoryPool;

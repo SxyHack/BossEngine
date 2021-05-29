@@ -6,6 +6,9 @@
 #include <QThreadPool>
 #include <QAtomicInt>
 
+#include <windows.h>
+#include <psapi.h>
+
 class BEWorkspace;
 class ScanWorker;
 
@@ -23,6 +26,11 @@ public:
 
 protected:
 	void run() override;
+
+	bool CheckIsIncludeModule(const QString& modName);
+	bool CheckIsValidRegion(const MEMORY_BASIC_INFORMATION& mbi);
+
+	void EnumVirtualMemoryByModule();
 
 signals:
 	void ES_MemoryScanning(qint64, qint64);

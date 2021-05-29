@@ -206,11 +206,11 @@ QString WinExtras::FormatMemoryType(DWORD value)
 	QString qsFormat;
 
 	if (value & MEM_IMAGE)
-		qsFormat += "MEM_TYPE_IMAGE|";
+		qsFormat += "MEM_IMAGE|";
 	if (value & MEM_MAPPED)
-		qsFormat += "MEM_TYPE_MAPPED|";
+		qsFormat += "MEM_MAPPED|";
 	if (value & MEM_PRIVATE)
-		qsFormat += "MEM_TYPE_PRIVATE|";
+		qsFormat += "MEM_PRIVATE|";
 
 	if (qsFormat.isEmpty())
 		qsFormat = QString("MEM_TYPE_ERROR(0x%1)").arg(value, 0, 16);
@@ -313,9 +313,6 @@ BOOL WinExtras::QueryProcessMemory(HANDLE hProcess, ULONG_PTR lpAddress, LIST_ME
 		qDebug() << QString::fromWCharArray(szModName);
 	}
 
-	//auto error = GetLastError();
-	//auto message = FormatLastError(error);
-	//qDebug("VirtualQueryEx Failed. ERROR:%d %s", error, message.toUtf8().data());
 	return TRUE;
 }
 
