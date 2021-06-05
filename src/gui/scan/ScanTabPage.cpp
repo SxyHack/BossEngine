@@ -6,17 +6,28 @@
 #include <QTableWidgetItem>
 #include <QFileInfo>
 #include <QDir>
+#include <QClipboard>
 #include <QtDebug>
+#include <QMessageBox>
 
-const qint32 QtRoleSystemDll = Qt::UserRole;
-const qint32 QtRoleData = Qt::UserRole + 1;
+// Module Table
+#define MODULE_SYSTEM_DLL Qt::UserRole
+#define MODULE_DATA       Qt::UserRole + 1
 
+// Found Table
+#define FOUND_PTR_ADDRESS Qt::UserRole
+#define FOUND_PTR_VALUE   Qt::UserRole + 1
+#define FOUND_PTR         Qt::UserRole + 2
+#define FOUND_PTR_CHANGED Qt::UserRole + 3
 
 ScanTabPage::ScanTabPage(QWidget* parent)
 	: QWidget(parent)
 	, _UniqueID(-1)
+	, _IsBase(true)
+	, _MenuFoundTable(this)
 {
 	ui.setupUi(this);
+
 	_BaseGroup.addButton(ui.Base2, EBaseMode_2);
 	_BaseGroup.addButton(ui.Base10, EBaseMode_10);
 	_BaseGroup.addButton(ui.Base16, EBaseMode_16);
@@ -24,6 +35,8 @@ ScanTabPage::ScanTabPage(QWidget* parent)
 	SetupScanValueType();
 	SetupScanMethod();
 	SetupModuleTableHead();
+	SetupFoundTableHead();
+	SetupFoundTableMenu();
 
 	connect(&_BaseGroup, SIGNAL(buttonClicked(QAbstractButton*)), this, SLOT(OnButtonBaseChanged(QAbstractButton*)));
 	connect(ui.ScanMethod, SIGNAL(currentIndexChanged(int)), this, SLOT(OnComboBoxScanMethodChanged(int)));
@@ -31,23 +44,27 @@ ScanTabPage::ScanTabPage(QWidget* parent)
 	connect(ui.ScanBtn, SIGNAL(clicked()), this, SLOT(OnButtonScan()));
 	connect(ui.ScanResetBtn, SIGNAL(clicked()), this, SLOT(OnButtonScanReset()));
 	connect(ui.ScanUndoBtn, SIGNAL(clicked()), this, SLOT(OnButtonScanUndo()));
+	connect(ui.FoundTable, &QTableWidget::customContextMenuRequested, this, &ScanTabPage::OnMenuFoundTable);
 
-	connect(&_Workspace, SIGNAL(ES_MemorySearchStarted()), this, SLOT(OnMemorySearchStarted()), Qt::QueuedConnection);
-	connect(&_Workspace, SIGNAL(ES_MemoryScanDone()), this, SLOT(OnMemorySearchDone()), Qt::QueuedConnection);
+	connect(&_Workspace, &BEWorkspace::ES_MemorySearchStarted, this, &ScanTabPage::OnMemorySearchStarted, Qt::QueuedConnection);
+	connect(&_Workspace, &BEWorkspace::ES_MemoryScanDone, this, &ScanTabPage::OnMemorySearchDone, Qt::QueuedConnection);
+	connect(&_Workspace, &BEWorkspace::ES_FoundPointer, this, &ScanTabPage::OnFoundPointer, Qt::QueuedConnection);
 
-	connect(&_ScanRefreshTimer, SIGNAL(timeout()), this, SLOT(OnTimeScanRefresh()));
+	connect(&_ScanningTimer, &QTimer::timeout, this, &ScanTabPage::OnTimeProcScanning);
+	connect(&_UpdateTimer,   &QTimer::timeout, this, &ScanTabPage::OnTimeProcUpdateResults);
 
 	//
 	// UI默认设置
 	ui.Base2->setVisible(false);          // 暂不支持2进制
-	ui.ScanValueB->setVisible(false);
 	ui.ScanValueType->setCurrentIndex(2); // 默认使用4字节
 	ui.ScanMethod->setCurrentIndex(0);    // 默认使用精确查找
 	ui.ScanValueA->setValidator(new QIntValidator(_I32_MIN, _I32_MAX));
 	ui.ScanValueB->setValidator(new QIntValidator(_I32_MIN, _I32_MAX));
+	ui.ScanValueB->setVisible(false);     // 
 
-	//ui.MemoryRngBegin->setText(QString("%1").arg(_Workspace.ScanBegAddress, 16, 16, QLatin1Char('0')).toUpper());
-	//ui.MemoryRngEnd->setText(QString("%1").arg(_Workspace.ScanEndAddress, 16, 16, QLatin1Char('0')).toUpper());
+	ui.ScanBtn->setEnabled(false);
+	ui.ScanResetBtn->setEnabled(false);
+	ui.ScanUndoBtn->setEnabled(false);
 
 	// 备份
 	_InputMask = ui.ScanValueA->inputMask();
@@ -82,11 +99,11 @@ void ScanTabPage::SetupScanValueType()
 
 void ScanTabPage::SetupScanMethod()
 {
-	ui.ScanMethod->addItem("精确数值", EScanMethod_Exact);
-	ui.ScanMethod->addItem("大于输入值", EScanMethod_Greater);
-	ui.ScanMethod->addItem("小于输入值", EScanMethod_Less);
-	ui.ScanMethod->addItem("介于..两数之间", EScanMethod_Between);
-	ui.ScanMethod->addItem("未知初始值", EScanMethod_Unknown);
+	ui.ScanMethod->addItem("精确数值", ECompareMethod_Exact);
+	ui.ScanMethod->addItem("大于输入值", ECompareMethod_MoreThan);
+	ui.ScanMethod->addItem("小于输入值", ECompareMethod_LessThan);
+	ui.ScanMethod->addItem("介于..两数之间", ECompareMethod_Between);
+	ui.ScanMethod->addItem("未知初始值", ECompareMethod_Unknown);
 }
 
 void ScanTabPage::SetupModuleTableHead()
@@ -120,6 +137,77 @@ void ScanTabPage::SetupModuleTableHead()
 
 		ui.ModuleTable->setHorizontalHeaderItem(i, headItem);
 	}
+}
+
+void ScanTabPage::SetupFoundTableHead()
+{
+	QStringList tableHead;
+	tableHead << "地址" << "当前值" << "先前值";
+	ui.FoundTable->setColumnCount(tableHead.length());
+	ui.FoundTable->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
+	ui.FoundTable->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
+	ui.FoundTable->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
+	ui.FoundTable->setAlternatingRowColors(true);
+
+	for (qint32 i = 0; i < tableHead.length(); i++)
+	{
+		auto headItem = new QTableWidgetItem(tableHead[i]);
+		headItem->setTextColor(Qt::lightGray);
+		headItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+		ui.FoundTable->setHorizontalHeaderItem(i, headItem);
+	}
+}
+
+void ScanTabPage::SetupFoundTableMenu()
+{
+	ui.FoundTable->setContextMenuPolicy(Qt::CustomContextMenu);
+
+	QAction* pAction = nullptr;
+
+	pAction = _MenuFoundTable.addAction(QIcon(":/MAIN/resources/Icons/copy128x128.png"), "复制地址");
+	connect(pAction, &QAction::triggered, this, &ScanTabPage::OnActionFoundTableCopyAddress);
+	_MenuFoundTable.addSeparator();
+	
+	_MenuFoundTable.addAction(QIcon(":/MAIN/resources/Icons/x128x128.png"), "删除条目");
+	
+	_MenuFoundTable.addSeparator();
+	
+	_MenuFoundTable.addAction("显示反汇编");
+	_MenuFoundTable.addAction("显示内存");
+	
+	_MenuFoundTable.addSeparator();
+
+	pAction = _MenuFoundTable.addAction("16进制");
+	pAction->setCheckable(true);
+
+	pAction = _MenuFoundTable.addAction("10进制");
+	pAction->setCheckable(true);
+	pAction->setChecked(true);
+}
+
+void ScanTabPage::AppendFoundPointer(BEPointer* pPtr)
+{
+	QString moduleName;
+	auto ulOffset = Engine.QueryStaticAddress(pPtr->Address, moduleName);
+
+	auto qsAddr = ulOffset < 0 
+		? QString::number(pPtr->Address, 16).toUpper()
+		: QString("%1+%2").arg(moduleName).arg(QString::number(ulOffset, 16).toUpper());
+	auto itemAddr = new QTableWidgetItem(qsAddr);
+	itemAddr->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+	itemAddr->setTextColor(ulOffset >= 0 ? Qt::darkGreen : Qt::white);
+	itemAddr->setData(FOUND_PTR_ADDRESS, pPtr->Address);
+	ui.FoundTable->setItem(pPtr->Index, 0, itemAddr);
+
+	auto qsValue = pPtr->Value.toString();
+	auto itemValue = new QTableWidgetItem(qsValue);
+	itemValue->setData(FOUND_PTR_ADDRESS, pPtr->Address);
+	itemValue->setData(FOUND_PTR_VALUE, pPtr->Value);
+	ui.FoundTable->setItem(pPtr->Index, 1, itemValue);
+
+	auto itemCopy = new QTableWidgetItem(qsValue);
+	itemCopy->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+	ui.FoundTable->setItem(pPtr->Index, 2, itemCopy);
 }
 
 void ScanTabPage::ShowModules()
@@ -165,8 +253,8 @@ void ScanTabPage::ShowModules()
 		itModName->setTextColor(color);
 		itModName->setToolTip(qsExeFile);
 		itModName->setCheckState(bSystemDll ? Qt::Unchecked : Qt::Checked);
-		itModName->setData(QtRoleSystemDll, bSystemDll);
-		itModName->setData(QtRoleData, JsonMaker::MakeWith(mod));
+		itModName->setData(MODULE_SYSTEM_DLL, bSystemDll);
+		itModName->setData(MODULE_DATA, JsonMaker::MakeWith(mod));
 
 		ui.ModuleTable->setItem(dwPos, 0, itModName);
 
@@ -185,6 +273,51 @@ void ScanTabPage::ShowModules()
 
 		ui.ModuleTable->setItem(dwPos, 2, itEndAddr);
 	}
+}
+
+void ScanTabPage::ShowUiStateOpenProcess()
+{
+	ui.ScanBtn->setEnabled(true);
+}
+
+void ScanTabPage::ShowUiStateNext()
+{
+	if (_IsBase)
+	{
+		_IsBase = false;
+		ui.FrameMemory->setEnabled(false);
+		ui.ScanValueType->setEnabled(false);
+
+		auto lastIndex = ui.ScanMethod->count() - 1;
+		ui.ScanMethod->removeItem(lastIndex);
+		ui.ScanMethod->addItem("增加的数值", ECompareMethod_Bigger);
+		ui.ScanMethod->addItem("减少的数值", ECompareMethod_Smaller);
+		ui.ScanMethod->addItem("数值增加了N", ECompareMethod_IncreaseN);
+		ui.ScanMethod->addItem("数值减少了N", ECompareMethod_DecreaseN);
+		ui.ScanMethod->addItem("变动的数值", ECompareMethod_Changed);
+		ui.ScanMethod->addItem("没变动的数值", ECompareMethod_Unchanged);
+		ui.ScanMethod->addItem("对比首次扫描", ECompareMethod_EqualBase);
+	}
+}
+
+void ScanTabPage::ShowUiStateInitial()
+{
+	_IsBase = true;
+	_Workspace.Reset();
+
+	ui.ScanBtn->setEnabled(true);
+	ui.ScanResetBtn->setEnabled(false);
+	ui.ScanUndoBtn->setEnabled(false);
+	ui.ScanValueType->setEnabled(true);
+	ui.FrameMemory->setEnabled(true);
+
+	ui.FoundTable->clearContents();
+	ui.FoundTable->setRowCount(0);
+	ui.ScanValueA->clear();
+	ui.ScanValueB->clear();
+	ui.ScanMethod->clear();
+
+	SetupScanMethod();
 }
 
 void ScanTabPage::ChangeToBase16()
@@ -272,7 +405,19 @@ void ScanTabPage::hideEvent(QHideEvent* e)
 
 void ScanTabPage::OnButtonScan()
 {
+	auto method = _Workspace.CompareMethod;
+	auto qsValueA = ui.ScanValueA->text();
+	auto qsValueB = ui.ScanValueB->text();
+
+	if (qsValueA.isEmpty() || (method == ECompareMethod_Between && qsValueB.isEmpty())) {
+		QMessageBox::warning(this, "提示", "搜索值不能为空");
+		return;
+	}
+
 	MODULEENTRY32 mod;
+	ui.ScanResetBtn->setEnabled(true);
+	ui.ScanUndoBtn->setEnabled(true);
+	ui.ScanValueType->setEnabled(false);
 
 	Engine.RemoveIncludeModules();
 
@@ -281,18 +426,20 @@ void ScanTabPage::OnButtonScan()
 		auto item = ui.ModuleTable->item(i, 0);
 		if (item->checkState() == Qt::Checked)
 		{
-			auto& json = item->data(QtRoleData).toJsonObject();
+			auto& json = item->data(MODULE_DATA).toJsonObject();
 			JsonMaker::ReturnTo(json, mod);
 			Engine.IncludeModule(mod);
 		}
 	}
 
-	_Workspace.SearchMemory(ui.ScanValueA->text(), ui.ScanValueB->text());
+	_Workspace.ScanValueInMemory(ui.ScanValueA->text(), ui.ScanValueB->text());
 }
 
 void ScanTabPage::OnButtonScanReset()
 {
 	_Workspace.Reset();
+
+	ShowUiStateInitial();
 }
 
 void ScanTabPage::OnButtonScanUndo()
@@ -342,41 +489,75 @@ void ScanTabPage::OnButtonModuleAllSelect(bool checked)
 	}
 }
 
+void ScanTabPage::OnMenuFoundTable(const QPoint& pos)
+{
+	auto gPos = ui.FoundTable->mapToGlobal(pos);
+	auto offset = QPoint(6, 20);
+
+	auto item = ui.FoundTable->itemAt(pos);
+	if (item == nullptr)
+	{
+		return;
+	}
+
+	_MenuFoundTable.move(gPos + offset);
+	_MenuFoundTable.show();
+}
+
+void ScanTabPage::OnActionFoundTableCopyAddress(bool checked)
+{
+	auto clip = QApplication::clipboard();
+	if (clip == nullptr)
+		return;
+	
+	auto items = ui.FoundTable->selectedItems();
+	if (items.isEmpty())
+		return;
+
+	auto itemSelected = items.at(0);
+	auto itemText = itemSelected->text();
+	qDebug() << "复制的内容:" << itemText;
+	clip->setText(itemText);
+}
+
 void ScanTabPage::OnComboBoxScanMethodChanged(int index)
 {
-	switch (EScanMethod(ui.ScanMethod->currentData().toInt()))
+	auto method = ECompareMethod(ui.ScanMethod->currentData().toInt());
+	_Workspace.CompareMethod = method;
+
+	switch (method)
 	{
-	case EScanMethod_Exact:
+	case ECompareMethod_Exact:
 		ui.ScanValueB->setVisible(false);
 		break;
-	case EScanMethod_Greater:
+	case ECompareMethod_MoreThan:
 		ui.ScanValueB->setVisible(false);
 		break;
-	case EScanMethod_Less:
+	case ECompareMethod_LessThan:
 		ui.ScanValueB->setVisible(false);
 		break;
-	case EScanMethod_Between:
+	case ECompareMethod_Between:
 		ui.ScanValueA->setPlaceholderText("大于等于输入数值");
 		ui.ScanValueB->setPlaceholderText("小于等于输入数值");
 		ui.ScanValueB->setVisible(true);
 		break;
-	case EScanMethod_Unknown:
+	case ECompareMethod_Unknown:
 		ui.ScanValueA->setVisible(false);
 		ui.ScanValueB->setVisible(false);
 		break;
-	case EScanMethod_MoreValue:
+	case ECompareMethod_Bigger:
 		break;
-	case EScanMethod_AddValue:
+	case ECompareMethod_IncreaseN:
 		break;
-	case EScanMethod_Smaller:
+	case ECompareMethod_Smaller:
 		break;
-	case EScanMethod_CutValue:
+	case ECompareMethod_DecreaseN:
 		break;
-	case EScanMethod_Changed:
+	case ECompareMethod_Changed:
 		break;
-	case EScanMethod_Equal:
+	case ECompareMethod_Unchanged:
 		break;
-	case EScanMethod_FirstDiff:
+	case ECompareMethod_EqualBase:
 		break;
 	default:
 		break;
@@ -427,20 +608,76 @@ void ScanTabPage::OnComboBoxScanValueTypeChanged(int)
 
 void ScanTabPage::OnMemorySearchStarted()
 {
-	qDebug() << "扫描开始...";
-	_ScanRefreshTimer.start(20);
+	// 清空数据
+	ui.FoundTable->clearContents();
+
+	_UpdateTimer.stop();
+	_ScanningTimer.start(20);
 	emit ES_MemoryScanStarted();
 }
 
-void ScanTabPage::OnMemorySearchDone()
+void ScanTabPage::OnMemorySearchDone(qint64 count)
 {
-	qDebug() << "扫描结束...";
+	_ScanningTimer.stop();
 
-	_ScanRefreshTimer.stop();
-	emit ES_MemoryScanDone();
+	if (count > 0)
+	{
+		ShowUiStateNext();
+		_UpdateTimer.start(1000);
+	}
+	else
+	{
+		ui.FoundTable->setRowCount(0);
+	}
+
+	emit ES_MemoryScanDone(count);
 }
 
-void ScanTabPage::OnTimeScanRefresh()
+void ScanTabPage::OnFoundPointer(BEPointer* pValue, qint64 count)
 {
+	ui.FoundTable->setRowCount(count);
+
+	AppendFoundPointer(pValue);
+}
+
+void ScanTabPage::OnTimeProcScanning()
+{
+	auto count = _Workspace.GetPointerCount();
+	emit ES_MemoryFoundValue(count);
 	emit ES_MemoryScanning(_Workspace.NumberOfScannedBytes, _Workspace.NumberOfScanTotalBytes);
+}
+
+void ScanTabPage::OnTimeProcUpdateResults()
+{
+	for (int i = 0; i < ui.FoundTable->rowCount(); i++)
+	{
+		auto itemValue = ui.FoundTable->item(i, 1);
+		if (itemValue == nullptr)
+			break;
+
+		QVariant newValue;
+
+		auto address = itemValue->data(FOUND_PTR_ADDRESS).toULongLong();
+		auto value = itemValue->data(FOUND_PTR_VALUE);
+		if (!_Workspace.ReadMemory(address, newValue))
+		{
+			itemValue->setText("???");
+			itemValue->setBackground(QBrush(Qt::red));
+			continue;
+		}
+
+		itemValue->setText(newValue.toString());
+
+		if (value != newValue)
+		{
+			itemValue->setBackground(QBrush(Qt::red));
+		}
+		else
+		{
+			itemValue->setBackground(QBrush());
+		}
+	}
+
+	auto count = _Workspace.GetPointerCount();
+	emit ES_MemoryFoundValue(count);
 }

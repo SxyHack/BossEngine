@@ -15,8 +15,6 @@ int main(int argc, char *argv[])
 	CustomLogMessageHandler::Instance();
 	qInstallMessageHandler(CustomLogMessageHandler::handle);
 
-	qDebug("Hello, World");
-
 	QApplication a(argc, argv);
 	QApplication::setStyle(new DarkStyle);
 	QApplication::setPalette(QApplication::style()->standardPalette());
@@ -30,9 +28,10 @@ int main(int argc, char *argv[])
 	framelessWindow.setWindowIcon(a.style()->standardIcon(QStyle::SP_DesktopIcon));
 
 	MainWindow* mainWindow = new MainWindow;
-	//mainWindow->showMaximized();
+	mainWindow->setWindowTitle(Random::GenerateString(32));
+	mainWindow->show();
 	// add the mainwindow to our custom frameless window
-	framelessWindow.setContent(mainWindow);
-	framelessWindow.showNormal();
+	//framelessWindow.setContent(mainWindow);
+	//framelessWindow.showNormal();
 	return a.exec();
 }

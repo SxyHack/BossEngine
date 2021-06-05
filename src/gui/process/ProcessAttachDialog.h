@@ -17,6 +17,7 @@ public:
 	~ProcessAttachDialog();
 
 	DWORD GetSelectedProcessID();
+	QString& GetSelectedProcessName();
 
 protected:
 	void SetupProcessCategory();
@@ -41,4 +42,5 @@ private:
 	Ui::ProcessAttachDialog ui;
 	WinExtras _Windows;
 	DWORD     _SelectProcessID;
+	QString   _SelectProcessName;
 };

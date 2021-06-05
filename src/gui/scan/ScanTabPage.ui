@@ -15,23 +15,48 @@
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout_5">
    <item>
-    <widget class="QTableWidget" name="tableWidget">
+    <widget class="QTableWidget" name="FoundTable">
      <property name="font">
       <font>
-       <family>Sarasa UI SC</family>
+       <family>Sarasa Mono SC</family>
+       <pointsize>9</pointsize>
+       <weight>50</weight>
+       <italic>false</italic>
+       <bold>false</bold>
       </font>
+     </property>
+     <property name="contextMenuPolicy">
+      <enum>Qt::CustomContextMenu</enum>
+     </property>
+     <property name="styleSheet">
+      <string notr="true"/>
+     </property>
+     <property name="editTriggers">
+      <set>QAbstractItemView::DoubleClicked</set>
      </property>
      <property name="alternatingRowColors">
       <bool>true</bool>
      </property>
      <property name="selectionMode">
-      <enum>QAbstractItemView::MultiSelection</enum>
+      <enum>QAbstractItemView::SingleSelection</enum>
      </property>
      <property name="selectionBehavior">
       <enum>QAbstractItemView::SelectRows</enum>
      </property>
+     <property name="verticalScrollMode">
+      <enum>QAbstractItemView::ScrollPerPixel</enum>
+     </property>
+     <property name="horizontalScrollMode">
+      <enum>QAbstractItemView::ScrollPerItem</enum>
+     </property>
      <attribute name="verticalHeaderVisible">
       <bool>false</bool>
+     </attribute>
+     <attribute name="verticalHeaderMinimumSectionSize">
+      <number>15</number>
+     </attribute>
+     <attribute name="verticalHeaderDefaultSectionSize">
+      <number>20</number>
      </attribute>
     </widget>
    </item>
@@ -439,7 +464,7 @@
          </font>
         </property>
         <property name="title">
-         <string>模块参数</string>
+         <string>快速配置</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -512,7 +537,7 @@
          <item>
           <widget class="QTableWidget" name="ModuleTable">
            <property name="styleSheet">
-            <string notr="true">font: 9pt &quot;Sarasa UI SC&quot;;</string>
+            <string notr="true">font: 10pt &quot;Sarasa Mono SC&quot;;</string>
            </property>
            <property name="alternatingRowColors">
             <bool>true</bool>

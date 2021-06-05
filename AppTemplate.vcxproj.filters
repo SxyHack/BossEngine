@@ -76,9 +76,6 @@
     <ClCompile Include="src\gui\scan\ScanTabPage.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\provider\VirtualMemoryProvider.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\core\provider\BEProvider.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -88,7 +85,7 @@
     <ClCompile Include="src\core\model\cmd\BECmd.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\model\cmd\BECmdSearchValue.cpp">
+    <ClCompile Include="src\core\model\cmd\BECmdScan.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\core\model\define.cpp">
@@ -98,6 +95,24 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\utility\JsonMaker.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\model\BEValue.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\model\compare\BECompare.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\model\compare\ExactCompare.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\settings\ScanSettings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\config\ConfigurationDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\config\ConfigurationScanWidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -123,9 +138,6 @@
     <QtMoc Include="src\gui\scan\ScanTabPage.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="src\core\provider\VirtualMemoryProvider.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
     <QtMoc Include="src\core\provider\BEProvider.h">
       <Filter>Header Files</Filter>
     </QtMoc>
@@ -135,10 +147,25 @@
     <QtMoc Include="src\core\model\cmd\BECmd.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="src\core\model\cmd\BECmdSearchValue.h">
+    <QtMoc Include="src\core\model\cmd\BECmdScan.h">
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="src\gui\scan\controls\BEHeaderView.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="src\core\model\BEValue.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="src\core\model\compare\BECompare.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="src\core\model\compare\ExactCompare.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="src\gui\config\ConfigurationDialog.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="src\gui\config\ConfigurationScanWidget.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
@@ -150,6 +177,12 @@
       <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="src\gui\scan\ScanTabPage.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="src\gui\config\ConfigurationDialog.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="src\gui\config\ConfigurationScanWidget.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>
@@ -260,6 +293,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\utility\JsonMaker.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\settings\ScanSettings.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

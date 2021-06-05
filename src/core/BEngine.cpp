@@ -77,6 +77,9 @@ BOOL BEngine::OpenProcess(DWORD pid)
 		return FALSE;
 	}
 
+	// 获取进程名字和窗口标题
+		
+
 	//SYSTEM_INFO si = { 0 };
 	//::GetSystemInfo(&si);
 	//LIST_MEMORY lstMemory;
@@ -121,6 +124,23 @@ void BEngine::RemoveIncludeModules()
 LIST_MODULE& BEngine::GetIncludeModules()
 {
 	return _IncludeModules;
+}
+
+qint64 BEngine::QueryStaticAddress(quint64 ulAddress, QString& modName)
+{
+	for (auto& mod : _AttachProcessModules)
+	{
+		quint64 dwBegAddr = (quint64)mod.modBaseAddr;
+		quint64 dwEndAddr = dwBegAddr + mod.modBaseSize;
+
+		if (dwBegAddr < ulAddress && ulAddress < dwEndAddr)
+		{
+			modName = QString::fromWCharArray(mod.szModule);
+			return  ulAddress - dwBegAddr;
+		}
+	}
+
+	return -1;
 }
 
 DWORD64 BEngine::GetModulesSize()

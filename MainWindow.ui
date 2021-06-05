@@ -33,7 +33,7 @@
        <widget class="QLabel" name="ScanCount">
         <property name="font">
          <font>
-          <family>Georgia</family>
+          <family>215000EURO</family>
           <pointsize>15</pointsize>
          </font>
         </property>
@@ -44,7 +44,7 @@
 </string>
         </property>
         <property name="text">
-         <string>5789412563</string>
+         <string>0</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -63,6 +63,18 @@
          </size>
         </property>
        </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="UIProcessName">
+        <property name="font">
+         <font>
+          <family>Sarasa UI SC</family>
+         </font>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>
@@ -104,7 +116,7 @@
      <x>0</x>
      <y>0</y>
      <width>945</width>
-     <height>22</height>
+     <height>23</height>
     </rect>
    </property>
   </widget>
@@ -120,7 +132,7 @@
   <widget class="QDockWidget" name="dock">
    <property name="minimumSize">
     <size>
-     <width>58</width>
+     <width>81</width>
      <height>200</height>
     </size>
    </property>

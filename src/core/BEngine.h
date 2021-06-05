@@ -3,13 +3,8 @@
 #include <QObject>
 #include <QMutex>
 
-#include <Windows.h>
-#include <tlhelp32.h>
-
 #include "WinExtras.h"
-
 #include "core/model/BEWorkspace.h"
-#include "provider/VirtualMemoryProvider.h"
 
 class BEngine : public QObject
 {
@@ -48,6 +43,14 @@ public:
 	//
 	void RemoveIncludeModules();
 	LIST_MODULE& GetIncludeModules();
+
+	//
+	// 查询静态地址
+	// 	   ulAddress: 传入地址
+	// 	   modName: 返回模块名字
+	// return (qint64): 返回偏移
+	//
+	qint64 QueryStaticAddress(quint64 ulAddress, QString& modName);
 	//////////////////////////////////////////////////////////////////////////
 	//
 	// 获取所有模块的总字节数
@@ -87,7 +90,6 @@ private:
 	DWORD          _LastErrorCode;
 	QString        _LastErrorMessage;
 	LIST_WORKSPACE _Workspaces;
-	VirtualMemoryProvider _VM;
 };
 
 #define Engine BEngine::Instance()

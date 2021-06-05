@@ -68,7 +68,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>themes\dark\framelesswindow;themes\dark;.\;src\;.\src\core\provider;.\src\core;.\src\gui\scan;.\src\core\struct;.\src\core\model\cmd;.\src\gui\scan\controls;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>themes\dark\framelesswindow;themes\dark;.\;src\;.\src\core\provider;.\src\core;.\src\gui\scan;.\src\core\struct;.\src\core\model\cmd;.\src\gui\scan\controls;.\src\core\model;.\src\core\model\compare;.\src\settings;.\src\gui\config;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <DisableSpecificWarnings>4828</DisableSpecificWarnings>
     </ClCompile>
@@ -78,7 +78,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>themes\dark\framelesswindow;themes\dark;.\;src\;.\src\core\provider;.\src\core;.\src\gui\scan;.\src\core\struct;.\src\core\model\cmd;.\src\gui\scan\controls;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>themes\dark\framelesswindow;themes\dark;.\;src\;.\src\core\provider;.\src\core;.\src\gui\scan;.\src\core\struct;.\src\core\model\cmd;.\src\gui\scan\controls;.\src\core\model;.\src\core\model\compare;.\src\settings;.\src\gui\config;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <DisableSpecificWarnings>4828</DisableSpecificWarnings>
     </ClCompile>
@@ -111,17 +111,22 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\core\BEngine.cpp" />
+    <ClCompile Include="src\core\model\BEValue.cpp" />
     <ClCompile Include="src\core\model\cmd\BECmd.cpp" />
-    <ClCompile Include="src\core\model\cmd\BECmdSearchValue.cpp" />
+    <ClCompile Include="src\core\model\cmd\BECmdScan.cpp" />
+    <ClCompile Include="src\core\model\compare\BECompare.cpp" />
+    <ClCompile Include="src\core\model\compare\ExactCompare.cpp" />
     <ClCompile Include="src\core\model\define.cpp" />
     <ClCompile Include="src\core\provider\BEProvider.cpp" />
-    <ClCompile Include="src\core\provider\VirtualMemoryProvider.cpp" />
     <ClCompile Include="src\core\model\BEWorkspace.cpp" />
+    <ClCompile Include="src\gui\config\ConfigurationDialog.cpp" />
+    <ClCompile Include="src\gui\config\ConfigurationScanWidget.cpp" />
     <ClCompile Include="src\gui\process\ProcessAttachDialog.cpp" />
     <ClCompile Include="src\gui\scan\controls\BEHeaderView.cpp" />
     <ClCompile Include="src\gui\scan\ScanTabPage.cpp" />
     <ClCompile Include="src\log\CustomLogMessageHandler.cpp" />
     <ClCompile Include="src\settings\GlobalSettings.cpp" />
+    <ClCompile Include="src\settings\ScanSettings.cpp" />
     <ClCompile Include="src\utility\JsonMaker.cpp" />
     <ClCompile Include="src\utility\Random.cpp" />
     <ClCompile Include="src\WinExtras.cpp" />
@@ -135,6 +140,8 @@
     <QtMoc Include="MainWindow.h" />
     <ClCompile Include="MainWindow.cpp" />
     <ClCompile Include="main.cpp" />
+    <QtUic Include="src\gui\config\ConfigurationDialog.ui" />
+    <QtUic Include="src\gui\config\ConfigurationScanWidget.ui" />
     <QtUic Include="src\gui\process\ProcessAttachDialog.ui" />
     <QtUic Include="src\gui\scan\ScanTabPage.ui" />
     <QtUic Include="themes\dark\framelesswindow\framelesswindow.ui" />
@@ -184,13 +191,18 @@
   <ItemGroup>
     <QtMoc Include="src\core\BEngine.h" />
     <QtMoc Include="src\gui\scan\ScanTabPage.h" />
-    <QtMoc Include="src\core\provider\VirtualMemoryProvider.h" />
     <QtMoc Include="src\core\provider\BEProvider.h" />
     <QtMoc Include="src\core\model\BEWorkspace.h" />
     <QtMoc Include="src\core\model\cmd\BECmd.h" />
-    <QtMoc Include="src\core\model\cmd\BECmdSearchValue.h" />
+    <QtMoc Include="src\core\model\cmd\BECmdScan.h" />
+    <QtMoc Include="src\core\model\BEValue.h" />
+    <QtMoc Include="src\core\model\compare\BECompare.h" />
+    <QtMoc Include="src\core\model\compare\ExactCompare.h" />
     <ClInclude Include="src\core\model\define.h" />
     <QtMoc Include="src\gui\scan\controls\BEHeaderView.h" />
+    <QtMoc Include="src\gui\config\ConfigurationDialog.h" />
+    <QtMoc Include="src\gui\config\ConfigurationScanWidget.h" />
+    <ClInclude Include="src\settings\ScanSettings.h" />
     <ClInclude Include="src\undocument.h" />
     <ClInclude Include="src\utility\JsonMaker.h" />
     <ClInclude Include="src\utility\Random.h" />

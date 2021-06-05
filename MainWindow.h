@@ -18,10 +18,13 @@ protected:
     void AddScanPage();
 
 private slots:
-    void onActionOpenProcess();
+    void OnActionOpenProcess(bool checked);
+    void OnActionOpenConfig(bool checked);
+
     void OnMemoryScanning(qint64 scanned, qint64 total);
     void OnMemoryScanStarted();
     void OnMemoryScanDone();
+    void OnMemoryFoundValue(qint64 count);
 
 private:
     Ui::MainWindowClass ui;

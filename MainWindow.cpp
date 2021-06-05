@@ -1,6 +1,7 @@
 #include "MainWindow.h"
 #include "gui/process/ProcessAttachDialog.h"
 #include "gui/scan/ScanTabPage.h"
+#include "gui/config/ConfigurationDialog.h"
 
 #include <QMessageBox>
 
@@ -19,12 +20,18 @@ MainWindow::MainWindow(QWidget *parent)
 
 void MainWindow::SetupToolBar()
 {
-    QAction* actOpenProcess = new QAction(QIcon(":/MAIN/resources/Icons/_load128x128.png"), tr("&Open..."), this);
+    QAction* actOpenProcess = new QAction(QIcon(":/MAIN/resources/Icons/openprocess128x128.png"), tr("&Open..."), this);
     actOpenProcess->setStatusTip("关联进程");
     actOpenProcess->setToolTip("关联进程");
     ui.mainToolBar->addAction(actOpenProcess);
-    
-    connect(actOpenProcess, SIGNAL(triggered()), this, SLOT(onActionOpenProcess()));
+    connect(actOpenProcess, &QAction::triggered, this, &MainWindow::OnActionOpenProcess);
+
+    // 配置
+    QAction* actConfig = new QAction(QIcon(":/MAIN/resources/Icons/gear128x128.png"), tr("&Settings"), this);
+    actConfig->setStatusTip("配置");
+    actConfig->setToolTip("配置");
+    ui.mainToolBar->addAction(actConfig);
+    connect(actConfig, &QAction::triggered, this, &MainWindow::OnActionOpenConfig);
 }
 
 void MainWindow::SetupStatusBar()
@@ -50,9 +57,10 @@ void MainWindow::AddScanPage()
     connect(page, &ScanTabPage::ES_MemoryScanning, this, &MainWindow::OnMemoryScanning, Qt::QueuedConnection);
     connect(page, &ScanTabPage::ES_MemoryScanStarted, this, &MainWindow::OnMemoryScanStarted, Qt::QueuedConnection);
     connect(page, &ScanTabPage::ES_MemoryScanDone, this, &MainWindow::OnMemoryScanDone, Qt::QueuedConnection);
+    connect(page, &ScanTabPage::ES_MemoryFoundValue, this, &MainWindow::OnMemoryFoundValue, Qt::QueuedConnection);
 }
 
-void MainWindow::onActionOpenProcess()
+void MainWindow::OnActionOpenProcess(bool checked)
 {
     ProcessAttachDialog dialog;
     
@@ -61,18 +69,28 @@ void MainWindow::onActionOpenProcess()
 	}
     
     DWORD dwSelectPID = dialog.GetSelectedProcessID();
-    qDebug("Select PID: %d", dwSelectPID);
+    QString qsProcessName = dialog.GetSelectedProcessName();
 	if (!Engine.OpenProcess(dwSelectPID)) 
     {
         QMessageBox::critical(this, "错误", Engine.GetLastErrorMessage(), QMessageBox::Ok);
         return;
 	}
 
+	ui.UIProcessName->setVisible(true);
+    ui.UIProcessName->setText(QString("%1-%2").arg(qsProcessName).arg(dwSelectPID));
+
     auto currentTab = (ScanTabPage*)ui.tabWidget->currentWidget();
     if (currentTab)
     {
         currentTab->ShowModules();
+        currentTab->ShowUiStateInitial();
     }
+}
+
+void MainWindow::OnActionOpenConfig(bool checked)
+{
+    ConfigurationDialog dialog;
+    dialog.exec();
 }
 
 void MainWindow::OnMemoryScanning(qint64 scanned, qint64 total)
@@ -90,4 +108,9 @@ void MainWindow::OnMemoryScanStarted()
 void MainWindow::OnMemoryScanDone()
 {
 	_ScanProgress->setVisible(false);
+}
+
+void MainWindow::OnMemoryFoundValue(qint64 count)
+{
+    ui.ScanCount->setText(QString::number(count));
 }

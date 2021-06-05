@@ -11,10 +11,11 @@ public:
 	BECmd();
 	~BECmd();
 
+	virtual qint64 GetFoundCount() = 0;
 	virtual void Stop() = 0;
 
 signals:
-	void ES_Done();
+	void ES_Done(qint64);
 	void ES_Started();
 
 };

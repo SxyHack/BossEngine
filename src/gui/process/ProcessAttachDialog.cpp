@@ -23,6 +23,11 @@ DWORD ProcessAttachDialog::GetSelectedProcessID()
 	return _SelectProcessID;
 }
 
+QString& ProcessAttachDialog::GetSelectedProcessName()
+{
+	return _SelectProcessName;
+}
+
 void ProcessAttachDialog::SetupProcessCategory()
 {
 	ui.TypeCombo->addItem("所有", 0);
@@ -37,7 +42,7 @@ void ProcessAttachDialog::SetupProcessTableHead()
 	tableHead << "PID" << "进程名称";
 
 	ui.ProcessList->setColumnCount(tableHead.length());
-	ui.ProcessList->setColumnWidth(0, 100);
+	ui.ProcessList->setColumnWidth(0, 120);
 	ui.ProcessList->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
 	ui.ProcessList->setColumnWidth(2, 50);
 	ui.ProcessList->setAlternatingRowColors(true);
@@ -48,7 +53,7 @@ void ProcessAttachDialog::SetupProcessTableHead()
 		QFont font = headItem->font();
 		font.setBold(true);
 
-		//headItem->setTextColor(Qt::green);
+		headItem->setTextColor(Qt::gray);
 		headItem->setFont(font);
 		ui.ProcessList->setHorizontalHeaderItem(i, headItem);
 	}
@@ -89,19 +94,19 @@ void ProcessAttachDialog::OnEnumProcessPrepare()
 
 void ProcessAttachDialog::OnEnumProcess(qint32 dwRow, PROCESSENTRY32 processEntry32)
 {
-	QString processID = QString("%1(0x%2)")
-		.arg(QString::number(processEntry32.th32ProcessID))
-		.arg(QString::number(processEntry32.th32ProcessID, 16));
+	QString processID = QString("%1").arg(processEntry32.th32ProcessID, 8, 10, QLatin1Char('0'));
 	QString processName = QString::fromWCharArray(processEntry32.szExeFile);
 
 	auto item0 = new QTableWidgetItem(processID);
 	item0->setTextAlignment(Qt::AlignCenter);
 	item0->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 	item0->setData(Qt::UserRole, (qint64)processEntry32.th32ProcessID);
+	item0->setData(Qt::UserRole + 1, processName);
 
 	auto item1 = new QTableWidgetItem(processName);
 	item1->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 	item1->setData(Qt::UserRole, (qint64)processEntry32.th32ProcessID);
+	item1->setData(Qt::UserRole + 1, processName);
 
 	QPixmap icon;
 	if (_Windows.GetProcessICON(processEntry32.th32ProcessID, icon))
@@ -131,6 +136,8 @@ void ProcessAttachDialog::OnClickOpenProcess()
 		return;
 
 	_SelectProcessID = current->data(Qt::UserRole).toLongLong();
+	_SelectProcessName = current->data(Qt::UserRole + 1).toString();
+
 	accept();
 }
 
