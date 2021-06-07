@@ -60,13 +60,6 @@ void BEngine::EnumProcess(const QString& filter)
 
 BOOL BEngine::OpenProcess(DWORD pid)
 {
-	//NTSTATUS status;
-	//OBJECT_ATTRIBUTES objAttr;
-	//CLIENT_ID clientID;
-	//InitializeObjectAttributes(&objAttr, NULL, 0, NULL, NULL);
-	//clientID.UniqueProcess = (HANDLE)pid;
-	//clientID.UniqueThread = 0;
-
 	_AttachProcessID = pid;
 	_AttachProcessHandle = ::OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
 	if (_AttachProcessHandle == NULL)
@@ -76,14 +69,6 @@ BOOL BEngine::OpenProcess(DWORD pid)
 		qCritical("OpenProcess[%d] failed, ERROR:0x%x", pid, _LastErrorCode);
 		return FALSE;
 	}
-
-	// 获取进程名字和窗口标题
-		
-
-	//SYSTEM_INFO si = { 0 };
-	//::GetSystemInfo(&si);
-	//LIST_MEMORY lstMemory;
-	//_WinExtras.QueryProcessMemory(_AttachProcessHandle, (ULONG_PTR)si.lpMinimumApplicationAddress, lstMemory);
 
 	return EnumModules();
 }
