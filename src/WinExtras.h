@@ -40,10 +40,10 @@ public:
 	//
 	// GetLastError返回值转成字符串
 	//
-	QString FormatLastError(DWORD lastErr);
-	QString FormatMemoryProtection(DWORD value);
-	QString FormatMemoryState(DWORD state);
-	QString FormatMemoryType(DWORD value);
+	static QString FormatLastError(DWORD lastErr);
+	static QString FormatMemoryProtection(DWORD value);
+	static QString FormatMemoryState(DWORD state);
+	static QString FormatMemoryType(DWORD value);
 	// 
 	// 查询进程的模块列表信息, 使用WindowsAPI
 	// 参数:

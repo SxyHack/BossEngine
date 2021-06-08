@@ -11,7 +11,6 @@
 #define BYTES_TO_PAGES(Size)    (((Size) >> PAGE_SHIFT) + (((Size) & (PAGE_SIZE - 1)) != 0))
 #define ROUND_TO_PAGES(Size)    (((ULONG_PTR)(Size) + PAGE_SIZE - 1) & ~(PAGE_SIZE - 1))
 
-
 typedef struct {
 	MEMORY_BASIC_INFORMATION mbi;         
 	QString                  desc;  // √Ë ˆ

@@ -115,6 +115,12 @@
     <ClCompile Include="src\gui\config\ConfigurationScanWidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\core\memory\Memory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\debugger\Debugger.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="themes\dark\DarkStyle.h">
@@ -166,6 +172,9 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="src\gui\config\ConfigurationScanWidget.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="src\core\debugger\Debugger.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
@@ -296,6 +305,21 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\settings\ScanSettings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\egine_types.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\memory\Memory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\module\module_types.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\global.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libs\ntdll\ntdll.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

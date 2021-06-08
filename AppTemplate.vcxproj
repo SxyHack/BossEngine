@@ -68,7 +68,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>themes\dark\framelesswindow;themes\dark;.\;src\;.\src\core\provider;.\src\core;.\src\gui\scan;.\src\core\struct;.\src\core\model\cmd;.\src\gui\scan\controls;.\src\core\model;.\src\core\model\compare;.\src\settings;.\src\gui\config;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>themes\dark\framelesswindow;themes\dark;.\;src\;.\src\core\provider;.\src\core;.\src\gui\scan;.\src\core\struct;.\src\core\model\cmd;.\src\gui\scan\controls;.\src\core\model;.\src\core\model\compare;.\src\settings;.\src\gui\config;.\src\core\debugger;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <DisableSpecificWarnings>4828</DisableSpecificWarnings>
     </ClCompile>
@@ -78,7 +78,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>themes\dark\framelesswindow;themes\dark;.\;src\;.\src\core\provider;.\src\core;.\src\gui\scan;.\src\core\struct;.\src\core\model\cmd;.\src\gui\scan\controls;.\src\core\model;.\src\core\model\compare;.\src\settings;.\src\gui\config;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>themes\dark\framelesswindow;themes\dark;.\;src\;.\src\core\provider;.\src\core;.\src\gui\scan;.\src\core\struct;.\src\core\model\cmd;.\src\gui\scan\controls;.\src\core\model;.\src\core\model\compare;.\src\settings;.\src\gui\config;.\src\core\debugger;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <DisableSpecificWarnings>4828</DisableSpecificWarnings>
     </ClCompile>
@@ -111,6 +111,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\core\BEngine.cpp" />
+    <ClCompile Include="src\core\debugger\Debugger.cpp" />
+    <ClCompile Include="src\core\memory\Memory.cpp" />
     <ClCompile Include="src\core\model\BEValue.cpp" />
     <ClCompile Include="src\core\model\cmd\BECmd.cpp" />
     <ClCompile Include="src\core\model\cmd\BECmdScan.cpp" />
@@ -198,10 +200,16 @@
     <QtMoc Include="src\core\model\BEValue.h" />
     <QtMoc Include="src\core\model\compare\BECompare.h" />
     <QtMoc Include="src\core\model\compare\ExactCompare.h" />
+    <QtMoc Include="src\core\debugger\Debugger.h" />
+    <ClInclude Include="libs\ntdll\ntdll.h" />
+    <ClInclude Include="src\core\egine_types.h" />
+    <ClInclude Include="src\core\memory\Memory.h" />
     <ClInclude Include="src\core\model\define.h" />
     <QtMoc Include="src\gui\scan\controls\BEHeaderView.h" />
     <QtMoc Include="src\gui\config\ConfigurationDialog.h" />
     <QtMoc Include="src\gui\config\ConfigurationScanWidget.h" />
+    <ClInclude Include="src\core\module\module_types.h" />
+    <ClInclude Include="src\global.h" />
     <ClInclude Include="src\settings\ScanSettings.h" />
     <ClInclude Include="src\undocument.h" />
     <ClInclude Include="src\utility\JsonMaker.h" />

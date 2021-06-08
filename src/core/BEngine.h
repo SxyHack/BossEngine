@@ -23,11 +23,14 @@ public:
 	//
 	void EnumProcess(const QString& filter = QString());
 
+
+public:
 	//
 	// 打开进程, 准备扫描或者读写
 	// 
 	BOOL OpenProcess(DWORD pid);
 	HANDLE GetProcessHandle();
+
 	//////////////////////////////////////////////////////////////////////////
 	// 
 	// 枚举打开进程的所有模块, 需要先调用 OpenProcess.

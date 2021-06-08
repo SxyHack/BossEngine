@@ -1,6 +1,8 @@
 #include "BEngine.h"
 #include "undocument.h"
+#include "libs/ntdll/ntdll.h"
 #include <QFileInfo>
+#include <>
 
 Q_DECLARE_METATYPE(PROCESSENTRY32);
 Q_DECLARE_METATYPE(MODULEENTRY32);
@@ -57,6 +59,7 @@ void BEngine::EnumProcess(const QString& filter)
 	emit sgEnumProcessDone(dwRow);
 	CloseHandle(hSnap);
 }
+
 
 BOOL BEngine::OpenProcess(DWORD pid)
 {
