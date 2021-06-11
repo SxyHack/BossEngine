@@ -38,8 +38,6 @@ MappingFile::MappingFile(const QString& path, Access access)
 	TCHAR szFileName[1024];
 	path.toWCharArray(szFileName);
 
-	_File_.handle();
-
 	//HANDLE hFile = CreateFile(szFileName, FileAccess, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	//if (hFile != INVALID_HANDLE_VALUE)
 	//{

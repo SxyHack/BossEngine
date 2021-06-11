@@ -68,9 +68,10 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>themes\dark\framelesswindow;themes\dark;.\;src\;.\src\core\provider;.\src\core;.\src\gui\scan;.\src\core\struct;.\src\core\model\cmd;.\src\gui\scan\controls;.\src\core\model;.\src\core\model\compare;.\src\settings;.\src\gui\config;.\src\core\debugger;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>themes\dark\framelesswindow;themes\dark;.\;src\;.\src\core\provider;.\src\core;.\src\gui\scan;.\src\core\struct;.\src\core\model\cmd;.\src\gui\scan\controls;.\src\core\model;.\src\core\model\compare;.\src\settings;.\src\gui\config;.\src\core\debugger;.\src\core\process;.\src\core\global;.\src\core\module;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
-      <DisableSpecificWarnings>4828</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4828; 4005</DisableSpecificWarnings>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
@@ -78,7 +79,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>themes\dark\framelesswindow;themes\dark;.\;src\;.\src\core\provider;.\src\core;.\src\gui\scan;.\src\core\struct;.\src\core\model\cmd;.\src\gui\scan\controls;.\src\core\model;.\src\core\model\compare;.\src\settings;.\src\gui\config;.\src\core\debugger;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>themes\dark\framelesswindow;themes\dark;.\;src\;.\src\core\provider;.\src\core;.\src\gui\scan;.\src\core\struct;.\src\core\model\cmd;.\src\gui\scan\controls;.\src\core\model;.\src\core\model\compare;.\src\settings;.\src\gui\config;.\src\core\debugger;.\src\core\process;.\src\core\global;.\src\core\module;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <DisableSpecificWarnings>4828</DisableSpecificWarnings>
     </ClCompile>
@@ -112,6 +113,8 @@
   <ItemGroup>
     <ClCompile Include="src\core\BEngine.cpp" />
     <ClCompile Include="src\core\debugger\Debugger.cpp" />
+    <ClCompile Include="src\core\global\global.cpp" />
+    <ClCompile Include="src\core\global\MappingFile.cpp" />
     <ClCompile Include="src\core\memory\Memory.cpp" />
     <ClCompile Include="src\core\model\BEValue.cpp" />
     <ClCompile Include="src\core\model\cmd\BECmd.cpp" />
@@ -119,6 +122,12 @@
     <ClCompile Include="src\core\model\compare\BECompare.cpp" />
     <ClCompile Include="src\core\model\compare\ExactCompare.cpp" />
     <ClCompile Include="src\core\model\define.cpp" />
+    <ClCompile Include="src\core\module\Module.cpp" />
+    <ClCompile Include="src\core\module\ModuleExport.cpp" />
+    <ClCompile Include="src\core\module\ModuleImport.cpp" />
+    <ClCompile Include="src\core\module\ModuleRelocation.cpp" />
+    <ClCompile Include="src\core\module\ModuleSection.cpp" />
+    <ClCompile Include="src\core\process\Process.cpp" />
     <ClCompile Include="src\core\provider\BEProvider.cpp" />
     <ClCompile Include="src\core\model\BEWorkspace.cpp" />
     <ClCompile Include="src\gui\config\ConfigurationDialog.cpp" />
@@ -201,15 +210,24 @@
     <QtMoc Include="src\core\model\compare\BECompare.h" />
     <QtMoc Include="src\core\model\compare\ExactCompare.h" />
     <QtMoc Include="src\core\debugger\Debugger.h" />
-    <ClInclude Include="libs\ntdll\ntdll.h" />
     <ClInclude Include="src\core\egine_types.h" />
+    <QtMoc Include="src\core\global\MappingFile.h" />
+    <ClInclude Include="src\core\global\be_assert.h" />
     <ClInclude Include="src\core\memory\Memory.h" />
     <ClInclude Include="src\core\model\define.h" />
     <QtMoc Include="src\gui\scan\controls\BEHeaderView.h" />
     <QtMoc Include="src\gui\config\ConfigurationDialog.h" />
     <QtMoc Include="src\gui\config\ConfigurationScanWidget.h" />
+    <QtMoc Include="src\core\module\Module.h" />
+    <QtMoc Include="src\core\module\ModuleSection.h" />
+    <ClInclude Include="src\core\module\ModuleExport.h" />
+    <ClInclude Include="src\core\module\ModuleImport.h" />
+    <ClInclude Include="src\core\module\ModuleRelocation.h" />
     <ClInclude Include="src\core\module\module_types.h" />
-    <ClInclude Include="src\global.h" />
+    <QtMoc Include="src\core\process\Process.h" />
+    <ClInclude Include="src\core\symbol\symbol_types.h" />
+    <ClInclude Include="src\core\symbol\symbol_undecorator.h" />
+    <ClInclude Include="src\core\global\global.h" />
     <ClInclude Include="src\settings\ScanSettings.h" />
     <ClInclude Include="src\undocument.h" />
     <ClInclude Include="src\utility\JsonMaker.h" />

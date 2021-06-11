@@ -1,8 +1,6 @@
 #include "BEngine.h"
 #include "undocument.h"
-#include "libs/ntdll/ntdll.h"
 #include <QFileInfo>
-#include <>
 
 Q_DECLARE_METATYPE(PROCESSENTRY32);
 Q_DECLARE_METATYPE(MODULEENTRY32);
@@ -27,12 +25,12 @@ BEngine& BEngine::Instance()
 	return instance;
 }
 
-void BEngine::EnumProcess(const QString& filter)
+void BEngine::ListProcesses(const QString& filter)
 {
 	BOOL ret = FALSE;
 	DWORD dwRow = 0;
-	PROCESSENTRY32 entry32 = { 0 };
-	entry32.dwSize = sizeof(PROCESSENTRY32);
+	PROCESSENTRY32 pe32 = { 0 };
+	pe32.dwSize = sizeof(PROCESSENTRY32);
 
 	HANDLE hSnap = ::CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
 	if (hSnap == INVALID_HANDLE_VALUE)
@@ -41,39 +39,48 @@ void BEngine::EnumProcess(const QString& filter)
 		return;
 	}
 
-	emit sgEnumProcessPrepare();
+	emit sgListProcessStart();
 
-	ret = ::Process32First(hSnap, &entry32);
+	ret = ::Process32First(hSnap, &pe32);
 	do 
 	{
-		if (entry32.th32ProcessID <= 0)
+		// System process and Idle process have special PID.
+		if (pe32.th32ProcessID == 0 || pe32.th32ProcessID == 4)
 			continue;
 
-		QString processName = QString::fromWCharArray(entry32.szExeFile);
+		// ¹ýÂË×Ô¼º
+		if (pe32.th32ProcessID == GetCurrentProcessId())
+			continue;
+
+		QString processName = QString::fromWCharArray(pe32.szExeFile);
 
 		if (filter.isEmpty() || processName.contains(filter)) {
-			emit sgEnumProcess(dwRow++, entry32);
+			emit sgListProcess(dwRow++, pe32);
 		}
-	} while (ret = ::Process32Next(hSnap, &entry32));
+	} while (ret = ::Process32Next(hSnap, &pe32));
 
-	emit sgEnumProcessDone(dwRow);
+	emit sgListProcessDone(dwRow);
 	CloseHandle(hSnap);
 }
 
 
 BOOL BEngine::OpenProcess(DWORD pid)
 {
-	_AttachProcessID = pid;
-	_AttachProcessHandle = ::OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
-	if (_AttachProcessHandle == NULL)
-	{
-		_LastErrorCode = GetLastError();
-		_LastErrorMessage = _WinExtras.FormatLastError(_LastErrorCode);
-		qCritical("OpenProcess[%d] failed, ERROR:0x%x", pid, _LastErrorCode);
+	if (!_AttachProcess.NtOpen(pid))
 		return FALSE;
-	}
 
-	return EnumModules();
+	BEDebugger.Start(&_AttachProcess);
+	return TRUE;
+	//_AttachProcessID = pid;
+	//_AttachProcessHandle = ::OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
+	//if (_AttachProcessHandle == NULL)
+	//{
+	//	_LastErrorCode = GetLastError();
+	//	_LastErrorMessage = _WinExtras.FormatLastError(_LastErrorCode);
+	//	qCritical("OpenProcess[%d] failed, ERROR:0x%x", pid, _LastErrorCode);
+	//	return FALSE;
+	//}
+	//return EnumModules();
 }
 
 HANDLE BEngine::GetProcessHandle()

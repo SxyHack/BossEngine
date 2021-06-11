@@ -41,6 +41,8 @@ public:
 	// GetLastError返回值转成字符串
 	//
 	static QString FormatLastError(DWORD lastErr);
+	static DWORD   SetNtLastError(NTSTATUS status);
+
 	static QString FormatMemoryProtection(DWORD value);
 	static QString FormatMemoryState(DWORD state);
 	static QString FormatMemoryType(DWORD value);
@@ -67,7 +69,8 @@ public:
 	//
 	// 获取系统目录, C:\Windows\System
 	//
-	QString GetSystemDir();
+	static QString GetSystemDir();
+	static QString TranslateNativeName(TCHAR* szName);
 private:
 
 

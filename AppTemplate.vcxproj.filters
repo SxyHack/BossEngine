@@ -121,6 +121,30 @@
     <ClCompile Include="src\core\debugger\Debugger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\core\process\Process.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\global\MappingFile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\module\Module.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\module\ModuleSection.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\module\ModuleExport.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\global\global.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\module\ModuleImport.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\module\ModuleRelocation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="themes\dark\DarkStyle.h">
@@ -175,6 +199,18 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="src\core\debugger\Debugger.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="src\core\process\Process.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="src\core\global\MappingFile.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="src\core\module\Module.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="src\core\module\ModuleSection.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
@@ -316,10 +352,25 @@
     <ClInclude Include="src\core\module\module_types.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\global.h">
+    <ClInclude Include="src\core\global\global.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="libs\ntdll\ntdll.h">
+    <ClInclude Include="src\core\module\ModuleExport.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\symbol\symbol_types.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\symbol\symbol_undecorator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\global\be_assert.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\module\ModuleImport.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\module\ModuleRelocation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

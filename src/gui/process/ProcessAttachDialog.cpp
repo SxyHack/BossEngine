@@ -61,7 +61,7 @@ void ProcessAttachDialog::SetupProcessTableHead()
 
 void ProcessAttachDialog::ShowProcessTable(const QString& filter)
 {
-	Engine.EnumProcess(filter);
+	Engine.ListProcesses(filter);
 }
 
 void ProcessAttachDialog::ShowProcessCategory()
@@ -72,18 +72,18 @@ void ProcessAttachDialog::ShowProcessCategory()
 void ProcessAttachDialog::showEvent(QShowEvent* e)
 {
 	//ShowProcessTable();
-	connect(&Engine, SIGNAL(sgEnumProcessPrepare()), this, SLOT(OnEnumProcessPrepare()));
-	connect(&Engine, SIGNAL(sgEnumProcess(qint32, PROCESSENTRY32)), this, SLOT(OnEnumProcess(qint32, PROCESSENTRY32)));
-	connect(&Engine, SIGNAL(sgEnumProcessDone(qint32)), this, SLOT(OnEnumProcessDone(qint32)));
+	connect(&Engine, SIGNAL(sgListProcessStart()), this, SLOT(OnEnumProcessPrepare()));
+	connect(&Engine, SIGNAL(sgListProcess(qint32, PROCESSENTRY32)), this, SLOT(OnEnumProcess(qint32, PROCESSENTRY32)));
+	connect(&Engine, SIGNAL(sgListProcessDone(qint32)), this, SLOT(OnEnumProcessDone(qint32)));
 
 	ShowProcessTable();
 }
 
 void ProcessAttachDialog::hideEvent(QHideEvent* e)
 {
-	disconnect(&Engine, SIGNAL(sgEnumProcessPrepare()), this, SLOT(OnEnumProcessPrepare()));
-	disconnect(&Engine, SIGNAL(sgEnumProcess(qint32, PROCESSENTRY32)), this, SLOT(OnEnumProcess(qint32, PROCESSENTRY32)));
-	disconnect(&Engine, SIGNAL(sgEnumProcessDone(qint32)), this, SLOT(OnEnumProcessDone(qint32)));
+	disconnect(&Engine, SIGNAL(sgListProcessStart()), this, SLOT(OnEnumProcessPrepare()));
+	disconnect(&Engine, SIGNAL(sgListProcess(qint32, PROCESSENTRY32)), this, SLOT(OnEnumProcess(qint32, PROCESSENTRY32)));
+	disconnect(&Engine, SIGNAL(sgListProcessDone(qint32)), this, SLOT(OnEnumProcessDone(qint32)));
 }
 
 void ProcessAttachDialog::OnEnumProcessPrepare()

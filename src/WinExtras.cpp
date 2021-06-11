@@ -1,5 +1,7 @@
 #include "WinExtras.h"
-#include "undocument.h"
+#include "libs/ntdll/ntdll.h"
+#include "global.h"
+
 #include <psapi.h>
 #include <QtDebug>
 
@@ -15,12 +17,13 @@ WinExtras::~WinExtras()
 
 BOOL WinExtras::AdjustPrivilege()
 {
-	NTSTATUS status = RtlAdjustPrivilege(SE_DEBUG_PRIVILEGE, TRUE, FALSE, &_DebugPrivilege);
-	if (!NT_SUCCESS(status)) {
-		return FALSE;
-	}
+	//NTSTATUS status = RtlAdjustPrivilege(SE_DEBUG_PRIVILEGE, TRUE, FALSE, &_DebugPrivilege);
+	//if (!NT_SUCCESS(status)) {
+	//	return FALSE;
+	//}
 
-	return _DebugPrivilege;
+	//return _DebugPrivilege;
+	return FALSE;
 }
 
 BOOL WinExtras::EnableDebugPrivilege(BOOL bEnable)
@@ -134,6 +137,13 @@ QString WinExtras::FormatLastError(DWORD lastErr)
 #else
 	return QString::fromLocal8Bit(lpMsgBuf);
 #endif
+}
+
+DWORD WinExtras::SetNtLastError(NTSTATUS status)
+{
+	DWORD dwErrCode = RtlNtStatusToDosError(status);
+	SetLastError(dwErrCode);
+	return dwErrCode;
 }
 
 QString WinExtras::FormatMemoryProtection(DWORD value)
@@ -321,6 +331,52 @@ QString WinExtras::GetSystemDir()
 	TCHAR szPath[512] = { 0 };
 	UINT nSize = GetSystemDirectory(szPath, 512);
 	return QString::fromWCharArray(szPath, nSize);
+}
+
+QString WinExtras::TranslateNativeName(TCHAR* szName)
+{
+	TCHAR szTranslatedName[MAX_FILE_PATH_SIZE] = { 0 };
+	TCHAR szDeviceName[3] = L"A:";
+	TCHAR szDeviceCOMName[5] = L"COM0";
+	int CurrentDeviceLen;
+
+	while (szDeviceName[0] <= 0x5A)
+	{
+		RtlZeroMemory(szTranslatedName, MAX_FILE_PATH_SIZE);
+		if (QueryDosDevice(szDeviceName, szTranslatedName, MAX_PATH * 2) > NULL)
+		{
+			CurrentDeviceLen = lstrlen(szTranslatedName);
+			lstrcat(szTranslatedName, (LPTSTR)(szName + CurrentDeviceLen));
+			if (lstrcmpi(szTranslatedName, szName) == NULL)
+			{
+				RtlZeroMemory(szTranslatedName, MAX_FILE_PATH_SIZE);
+				lstrcat(szTranslatedName, szDeviceName);
+				lstrcat(szTranslatedName, (LPTSTR)(szName + CurrentDeviceLen));
+				return QString::fromWCharArray(szTranslatedName);
+			}
+		}
+		szDeviceName[0]++;
+	}
+
+	while (szDeviceCOMName[3] <= 0x39)
+	{
+		RtlZeroMemory(szTranslatedName, MAX_FILE_PATH_SIZE);
+		if (QueryDosDevice(szDeviceCOMName, szTranslatedName, MAX_PATH * 2) > NULL)
+		{
+			CurrentDeviceLen = lstrlen(szTranslatedName);
+			lstrcat(szTranslatedName, szName + CurrentDeviceLen);
+			if (lstrcmpi(szTranslatedName, szName) == NULL)
+			{
+				RtlZeroMemory(szTranslatedName, MAX_FILE_PATH_SIZE);
+				lstrcat(szTranslatedName, szDeviceCOMName);
+				lstrcat(szTranslatedName, szName + CurrentDeviceLen);
+				return QString::fromWCharArray(szTranslatedName);
+			}
+		}
+		szDeviceCOMName[3]++;
+	}
+
+	return QString();
 }
 
 //BOOL WinExtras::QueryProcessInformation(HANDLE hProcess)

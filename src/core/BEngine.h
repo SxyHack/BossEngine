@@ -5,6 +5,8 @@
 
 #include "WinExtras.h"
 #include "core/model/BEWorkspace.h"
+#include "Process.h"
+#include "Debugger.h"
 
 class BEngine : public QObject
 {
@@ -16,13 +18,12 @@ public:
 	static BEngine& Instance();
 
 	//
-	// 枚举所有进程, 会发出三个信号 sgEnumProcessPrepare, sgEnumProcess, sgEnumProcessDone
-	// sgEnumProcessPrepare: 在循环开始前发射
-	// sgEnumProcess: 每发现一个进程时发射
-	// sgEnumProcessDone: 遍历循环结束后发射
+	// 枚举所有进程, 会发出三个信号 sgListProcessStart, sgListProcess, sgListProcessDone
+	// sgListProcessStart: 在循环开始前发射
+	// sgListProcess: 每发现一个进程时发射
+	// sgListProcessDone: 遍历循环结束后发射
 	//
-	void EnumProcess(const QString& filter = QString());
-
+	void ListProcesses(const QString& filter = QString());
 
 public:
 	//
@@ -78,9 +79,9 @@ public:
 
 
 signals:
-	void sgEnumProcessPrepare();
-	void sgEnumProcess(qint32, PROCESSENTRY32);
-	void sgEnumProcessDone(qint32);
+	void sgListProcessStart();
+	void sgListProcess(qint32, PROCESSENTRY32);
+	void sgListProcessDone(qint32);
 
 private:
 	BEngine();
@@ -88,6 +89,7 @@ private:
 	WinExtras      _WinExtras;
 	DWORD          _AttachProcessID;
 	HANDLE         _AttachProcessHandle;
+	Process        _AttachProcess;
 	LIST_MODULE    _AttachProcessModules;
 	LIST_MODULE    _IncludeModules;
 	DWORD          _LastErrorCode;

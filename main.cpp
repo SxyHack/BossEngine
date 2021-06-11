@@ -1,19 +1,31 @@
-#include "MainWindow.h"
+﻿#include "MainWindow.h"
 #include "DarkStyle.h"
 #include "framelesswindow.h"
 #include "MainWindow.h"
 #include "log/CustomLogMessageHandler.h"
 #include "utility/Random.h"
 
+#include <QtDebug>
 #include <QtWidgets/QApplication>
 
 #pragma warning(disable: 4828)
 
+const QString Welcome = R"(
+ ######  #######  #####   #####     ####### #     #  #####  ### #     # ####### 
+ #     # #     # #     # #     #    #       ##    # #     #  #  ##    # #       
+ #     # #     # #       #          #       # #   # #        #  # #   # #       
+ ######  #     #  #####   #####     #####   #  #  # #  ####  #  #  #  # #####   
+ #     # #     #       #       #    #       #   # # #     #  #  #   # # #       
+ #     # #     # #     # #     #    #       #    ## #     #  #  #    ## #       
+ ######  #######  #####   #####     ####### #     #  #####  ### #     # ####### 
+)";
 
 int main(int argc, char *argv[])
 {
 	CustomLogMessageHandler::Instance();
 	qInstallMessageHandler(CustomLogMessageHandler::handle);
+
+	qDebug() << Welcome.toUtf8().data();
 
 	QApplication a(argc, argv);
 	QApplication::setStyle(new DarkStyle);

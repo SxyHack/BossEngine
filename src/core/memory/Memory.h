@@ -23,24 +23,22 @@ typedef QList<MEMORY_PAGE> LIST_MEMORY_PAGE;
 //
 class BEMemory
 {
-private:
-	BEMemory();
-
 public:
 	static BEMemory& Instance();
 
 	//
 	// brief 通过 windows-sdk 获取所有有效的内存页.
-	// param: bListAll 是否列举所有的页面
-	// return: bool 成功返回true, 失败返回false
+	// param bListAll - 是否列举所有的页面
+	// return bool - 成功返回true, 失败返回false
 	// 
 	bool LoadPages(bool bListAll = true);
 
-private:
+public: // static
+	static bool IsCanonicalAddress(quint64 address);
 
 private:
 	LIST_MEMORY_PAGE _Pages;
 };
 
 
-#define Memory BEMemory::Instance()
+#define BEMem BEMemory::Instance()
