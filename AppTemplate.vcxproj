@@ -129,9 +129,17 @@
     <ClCompile Include="src\core\module\ModuleImport.cpp" />
     <ClCompile Include="src\core\module\ModuleRelocation.cpp" />
     <ClCompile Include="src\core\module\ModuleSection.cpp" />
-    <ClCompile Include="src\core\process\Process.cpp" />
+    <ClCompile Include="src\core\process\Process.cpp">
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">input</DynamicSource>
+      <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).moc</QtMocFileName>
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Release|x64'">input</DynamicSource>
+      <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename).moc</QtMocFileName>
+    </ClCompile>
     <ClCompile Include="src\core\provider\BEProvider.cpp" />
     <ClCompile Include="src\core\model\BEWorkspace.cpp" />
+    <ClCompile Include="src\core\thread\BEThread.cpp" />
+    <ClCompile Include="src\core\thread\BEThreadTracker.cpp" />
+    <ClCompile Include="src\core\thread\EnumThreadWorker.cpp" />
     <ClCompile Include="src\gui\config\ConfigurationDialog.cpp" />
     <ClCompile Include="src\gui\config\ConfigurationScanWidget.cpp" />
     <ClCompile Include="src\gui\process\ProcessAttachDialog.cpp" />
@@ -230,6 +238,9 @@
     <ClInclude Include="src\core\symbol\symbol_types.h" />
     <ClInclude Include="src\core\symbol\symbol_undecorator.h" />
     <ClInclude Include="src\core\global\global.h" />
+    <QtMoc Include="src\core\thread\BEThread.h" />
+    <QtMoc Include="src\core\thread\EnumThreadWorker.h" />
+    <QtMoc Include="src\core\thread\BEThreadTracker.h" />
     <ClInclude Include="src\settings\ScanSettings.h" />
     <ClInclude Include="src\undocument.h" />
     <ClInclude Include="src\utility\JsonMaker.h" />

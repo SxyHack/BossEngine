@@ -121,9 +121,6 @@
     <ClCompile Include="src\core\debugger\Debugger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\process\Process.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\core\global\MappingFile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -143,6 +140,18 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\core\module\ModuleRelocation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\thread\BEThread.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\thread\EnumThreadWorker.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\process\Process.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\thread\BEThreadTracker.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -211,6 +220,15 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="src\core\module\ModuleSection.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="src\core\thread\BEThread.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="src\core\thread\EnumThreadWorker.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="src\core\thread\BEThreadTracker.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

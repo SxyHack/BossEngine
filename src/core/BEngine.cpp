@@ -70,7 +70,7 @@ BOOL BEngine::OpenProcess(DWORD pid)
 		return FALSE;
 
 	//BEDebugger.Start(&_AttachProcess);
-	//_AttachProcess.EnumThreads();
+	_AttachProcess.EnumThreads();
 
 	return TRUE;
 	//_AttachProcessID = pid;

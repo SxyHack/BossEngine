@@ -1,21 +1,30 @@
 #include "Process.h"
 #include "WinExtras.h"
 #include "libs/ntdll/ntdll.h"
+#include "EnumThreadWorker.h"
 
 #include <QFile>
 #include <QMutex>
 
 #define MAX_FILE_PATH_SIZE 1024
 
+static QMutex mxAppendThread;
+static QMutex mxAppendMod;
+
 Process::Process() : QObject(nullptr)
-, _Handle(NULL)
 , PID(0)
+, _Handle(NULL)
 , _Error(0)
+, _EnumThread(new EnumThreadWorker(this))
 {
 }
 
 Process::~Process()
 {
+	if (_EnumThread) {
+		_EnumThread->Stop();
+		delete _EnumThread;
+	}
 }
 
 BOOL Process::Open(DWORD dwPID)
@@ -86,112 +95,160 @@ HANDLE Process::Handle()
 
 void Process::AppendModule(Module* pMod)
 {
-	static QMutex mxAppendMod;
 	QMutexLocker lock(&mxAppendMod);
 
 	_MoudleMap.insert(QRange(pMod->ModBase, pMod->ModBase + pMod->ModSize - 1), pMod);
 }
 
-PE_ARCH Process::GetPEArch(const QString& qsFileName)
+void Process::AppendThread(BEThread* pThread)
 {
-	auto result = PE_ARCH::Invalid;
+	QMutexLocker lock(&mxAppendThread);
+
+	if (_ThreadMap.contains(pThread->ThreadID))
+		return;
+
+	_ThreadMap.insert(pThread->ThreadID, pThread);
+}
+
+void Process::RemoveThread(quint64 tid)
+{
+	QMutexLocker lock(&mxAppendThread);
+
+	if (_ThreadMap.contains(tid))
+	{
+		auto pThread = _ThreadMap.take(tid);
+		delete pThread;
+	}
+}
+
+void Process::RemoveThreads()
+{
+	QMutexLocker lock(&mxAppendThread);
+
+	for (auto pThread : _ThreadMap)
+	{
+		delete pThread;
+	}
+
+	_ThreadMap.clear();
+}
+
+bool Process::ThreadIsExist(quint64 tid)
+{
+	QMutexLocker lock(&mxAppendThread);
+	return _ThreadMap.contains(tid);
+}
+
+void Process::EnumThreads()
+{
+	_EnumThread->start(QThread::HighPriority);
+}
+
+void Process::StartThreadTrack()
+{
+
+}
+
+ARCH Process::GetPEArch(const QString& qsFileName)
+{
+	auto result = ARCH::Invalid;
 	if (!QFile::exists(qsFileName))
 	{
-		return PE_ARCH::Invalid;
+		return ARCH::Invalid;
 	}
 
 	QFile qfile(qsFileName);
 	if (!qfile.open(QIODevice::ReadOnly))
 	{
-		return PE_ARCH::Invalid;
+		return ARCH::Invalid;
 	}
 
 	auto pFileMap = qfile.map(0, 0);
 	if (pFileMap == nullptr)
 	{
-		return PE_ARCH::Invalid;
+		return ARCH::Invalid;
 	}
 
-	//__try
-	//{
-	PIMAGE_DOS_HEADER pImageDosHeader = (PIMAGE_DOS_HEADER)pFileMap;
-	if (pImageDosHeader->e_magic == IMAGE_DOS_SIGNATURE)
+	try
 	{
-		PIMAGE_NT_HEADERS pImageNtHeader = (PIMAGE_NT_HEADERS)(ULONG_PTR(pFileMap) + pImageDosHeader->e_lfanew);
-		if (pImageNtHeader->Signature == IMAGE_NT_SIGNATURE)
+		PIMAGE_DOS_HEADER pImageDosHeader = (PIMAGE_DOS_HEADER)pFileMap;
+		if (pImageDosHeader->e_magic == IMAGE_DOS_SIGNATURE)
 		{
-			auto machine = pImageNtHeader->FileHeader.Machine;
-			if (machine == IMAGE_FILE_MACHINE_I386 || machine == IMAGE_FILE_MACHINE_AMD64)
+			PIMAGE_NT_HEADERS pImageNtHeader = (PIMAGE_NT_HEADERS)(ULONG_PTR(pFileMap) + pImageDosHeader->e_lfanew);
+			if (pImageNtHeader->Signature == IMAGE_NT_SIGNATURE)
 			{
-				bool bIsDLL = (pImageNtHeader->FileHeader.Characteristics & IMAGE_FILE_DLL) == IMAGE_FILE_DLL;
-				bool bIsFile86 = (machine == IMAGE_FILE_MACHINE_I386);
-
-				// Set the native architecture of the PE file (to still have something to show for if the COM directory is invalid).
-				result = bIsFile86 ? PE_ARCH::Native86 : PE_ARCH::Native64;
-
-				ULONG_PTR comAddr = 0, comSize = 0;
-				if (bIsFile86) // x86
+				auto machine = pImageNtHeader->FileHeader.Machine;
+				if (machine == IMAGE_FILE_MACHINE_I386 || machine == IMAGE_FILE_MACHINE_AMD64)
 				{
-					auto pnth32 = PIMAGE_NT_HEADERS32(pImageNtHeader);
-					comAddr = pnth32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR].VirtualAddress;
-					comSize = pnth32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR].Size;
-				}
-				else
-				{
-					auto pnth64 = PIMAGE_NT_HEADERS64(pImageNtHeader);
-					comAddr = pnth64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR].VirtualAddress;
-					comSize = pnth64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR].Size;
-				}
+					bool bIsDLL = (pImageNtHeader->FileHeader.Characteristics & IMAGE_FILE_DLL) == IMAGE_FILE_DLL;
+					bool bIsFile86 = (machine == IMAGE_FILE_MACHINE_I386);
 
-				// Check if the file has a (valid) COM (.NET) directory.
-				if (comAddr && comSize >= sizeof(IMAGE_COR20_HEADER))
-				{
-					// Find out which flavor of dotnet we're dealing with. Specifically,
-					// "Any CPU" can be compiled with two flavors, "Prefer 32 bit" or not.
-					// Without the 32bit preferred flag, the loader will load the .NET
-					// environment based on the current platforms bitness (x86 or x64)
-					// Class libraries (DLLs) cannot specify the "Prefer 32 bit".
-					// https://mega.nz/#!vx5nVILR!jLafWGWhhsC0Qo5fE-3oEIc-uHBcRpraOo8L_KlUeXI
-					// Binaries that do not have COMIMAGE_FLAGS_ILONLY appear to be executed
-					// in a process that matches their native type.
-					// https://github.com/x64dbg/x64dbg/issues/1758
-					auto pcorh = PIMAGE_COR20_HEADER(ULONG_PTR(pFileMap) + comAddr);
-					if (pcorh->cb == sizeof(IMAGE_COR20_HEADER))
+					// Set the native architecture of the PE file (to still have something to show for if the COM directory is invalid).
+					result = bIsFile86 ? ARCH::Native86 : ARCH::Native64;
+
+					ULONG_PTR comAddr = 0, comSize = 0;
+					if (bIsFile86) // x86
 					{
-						auto flags = pcorh->Flags;
+						auto pnth32 = PIMAGE_NT_HEADERS32(pImageNtHeader);
+						comAddr = pnth32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR].VirtualAddress;
+						comSize = pnth32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR].Size;
+					}
+					else
+					{
+						auto pnth64 = PIMAGE_NT_HEADERS64(pImageNtHeader);
+						comAddr = pnth64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR].VirtualAddress;
+						comSize = pnth64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR].Size;
+					}
+
+					// Check if the file has a (valid) COM (.NET) directory.
+					if (comAddr && comSize >= sizeof(IMAGE_COR20_HEADER))
+					{
+						// Find out which flavor of dotnet we're dealing with. Specifically,
+						// "Any CPU" can be compiled with two flavors, "Prefer 32 bit" or not.
+						// Without the 32bit preferred flag, the loader will load the .NET
+						// environment based on the current platforms bitness (x86 or x64)
+						// Class libraries (DLLs) cannot specify the "Prefer 32 bit".
+						// https://mega.nz/#!vx5nVILR!jLafWGWhhsC0Qo5fE-3oEIc-uHBcRpraOo8L_KlUeXI
+						// Binaries that do not have COMIMAGE_FLAGS_ILONLY appear to be executed
+						// in a process that matches their native type.
+						// https://github.com/x64dbg/x64dbg/issues/1758
+						auto pcorh = PIMAGE_COR20_HEADER(ULONG_PTR(pFileMap) + comAddr);
+						if (pcorh->cb == sizeof(IMAGE_COR20_HEADER))
+						{
+							auto flags = pcorh->Flags;
 #define test(x) (flags & x) == x
 #define MY_COMIMAGE_FLAGS_32BITPREFERRED 0x00020000
-						if (bIsFile86) // x86
-						{
-							if (test(COMIMAGE_FLAGS_32BITREQUIRED))
+							if (bIsFile86) // x86
 							{
-								result = !bIsDLL && test(MY_COMIMAGE_FLAGS_32BITPREFERRED) ? PE_ARCH::DotnetAnyCpuPrefer32 : PE_ARCH::Dotnet86;
+								if (test(COMIMAGE_FLAGS_32BITREQUIRED))
+								{
+									result = !bIsDLL && test(MY_COMIMAGE_FLAGS_32BITPREFERRED) ? ARCH::DotnetAnyCpuPrefer32 : ARCH::Dotnet86;
+								}
+								else if (test(COMIMAGE_FLAGS_ILONLY))
+								{
+									result = ARCH::DotnetAnyCpu;
+								}
+								else
+								{
+									result = ARCH::Dotnet86;
+								}
 							}
-							else if (test(COMIMAGE_FLAGS_ILONLY))
+							else // x64
 							{
-								result = PE_ARCH::DotnetAnyCpu;
+								result = ARCH::Dotnet64;
 							}
-							else
-							{
-								result = PE_ARCH::Dotnet86;
-							}
-						}
-						else // x64
-						{
-							result = PE_ARCH::Dotnet64;
-						}
 #undef MY_COMIMAGE_FLAGS_32BITPREFERRED
 #undef test
+						}
 					}
 				}
 			}
 		}
 	}
-	//}
-	//__except (EXCEPTION_EXECUTE_HANDLER)
-	//{
-	//	qWarning("EXCEPTION_EXECUTE_HANDLER");
-	//}
+	catch (...)
+	{
+		qWarning("EXCEPTION_EXECUTE_HANDLER");
+	}
 
 	qfile.unmap(pFileMap);
 	qfile.close();

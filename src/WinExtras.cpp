@@ -284,7 +284,10 @@ BOOL WinExtras::EnumProcessModulesTH(IN DWORD dwPID, OUT LIST_MODULE& modules)
 	ret = Module32First(hSnap, &moduleEntry);
 	do 
 	{
-		modules.append(moduleEntry);
+		if (moduleEntry.th32ProcessID == dwPID)
+		{
+			modules.append(moduleEntry);
+		}
 	} while (ret = Module32Next(hSnap, &moduleEntry));
 
 	CloseHandle(hSnap);
