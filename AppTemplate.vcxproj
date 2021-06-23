@@ -76,7 +76,7 @@
     <Link>
       <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
       <AdditionalLibraryDirectories>$(ProjectDir)libs\detours\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>detours.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -132,8 +132,6 @@
     <ClCompile Include="src\core\process\Process.cpp" />
     <ClCompile Include="src\core\provider\BEProvider.cpp" />
     <ClCompile Include="src\core\model\BEWorkspace.cpp" />
-    <ClCompile Include="src\core\thread\BEThreadInfo.cpp" />
-    <ClCompile Include="src\core\tracker\OpcodeTracker.cpp" />
     <ClCompile Include="src\gui\config\ConfigurationDialog.cpp" />
     <ClCompile Include="src\gui\config\ConfigurationScanWidget.cpp" />
     <ClCompile Include="src\gui\process\ProcessAttachDialog.cpp" />
@@ -232,8 +230,6 @@
     <ClInclude Include="src\core\symbol\symbol_types.h" />
     <ClInclude Include="src\core\symbol\symbol_undecorator.h" />
     <ClInclude Include="src\core\global\global.h" />
-    <QtMoc Include="src\core\tracker\OpcodeTracker.h" />
-    <QtMoc Include="src\core\thread\BEThreadInfo.h" />
     <ClInclude Include="src\settings\ScanSettings.h" />
     <ClInclude Include="src\undocument.h" />
     <ClInclude Include="src\utility\JsonMaker.h" />

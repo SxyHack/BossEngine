@@ -145,12 +145,6 @@
     <ClCompile Include="src\core\module\ModuleRelocation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\tracker\OpcodeTracker.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\core\thread\BEThreadInfo.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="themes\dark\DarkStyle.h">
@@ -217,12 +211,6 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="src\core\module\ModuleSection.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="src\core\tracker\OpcodeTracker.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="src\core\thread\BEThreadInfo.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
