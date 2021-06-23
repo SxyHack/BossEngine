@@ -1,9 +1,13 @@
-﻿#include "MainWindow.h"
+#include "MainWindow.h"
 #include "DarkStyle.h"
 #include "framelesswindow.h"
 #include "MainWindow.h"
 #include "log/CustomLogMessageHandler.h"
 #include "utility/Random.h"
+
+#include <Windows.h>
+
+//#include "libs/detours/include/detours.h"
 
 #include <QtDebug>
 #include <QtWidgets/QApplication>

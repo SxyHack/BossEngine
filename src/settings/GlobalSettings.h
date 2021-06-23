@@ -10,8 +10,8 @@ public:
 	void SetSymbolCacheDir(const QString& path);
 	QString GetSymbolCacheDir();
 
-	void SetAllowUnicodePathInDebugDirectory(bool allow);
-	bool GetAllowUnicodePathInDebugDirectory();
+	void SetAllowUNCPathInDebugDirectory(bool allow);
+	bool GetAllowUNCPathInDebugDirectory();
 
 protected:
 	GlobalSettings();

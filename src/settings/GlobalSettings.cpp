@@ -24,7 +24,7 @@ QString GlobalSettings::GetSymbolCacheDir()
 	return dir;
 }
 
-void GlobalSettings::SetAllowUnicodePathInDebugDirectory(bool allow)
+void GlobalSettings::SetAllowUNCPathInDebugDirectory(bool allow)
 {
 	mSettings->beginGroup("MODULE");
 	mSettings->setValue("allow_unicode_path_in_debug_dir", allow);
@@ -32,7 +32,7 @@ void GlobalSettings::SetAllowUnicodePathInDebugDirectory(bool allow)
 	mSettings->endGroup();
 }
 
-bool GlobalSettings::GetAllowUnicodePathInDebugDirectory()
+bool GlobalSettings::GetAllowUNCPathInDebugDirectory()
 {
 	mSettings->beginGroup("MODULE");
 	auto ret = mSettings->value("allow_unicode_path_in_debug_dir", false).toBool();

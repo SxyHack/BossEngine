@@ -35,12 +35,12 @@
     <Import Project="$(QtMsBuild)\qt_defaults.props" />
   </ImportGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
-    <QtInstall>Qt5.15x64</QtInstall>
-    <QtModules>core;gui;widgets;winextras</QtModules>
+    <QtInstall>5.15.0_msvc2019_64</QtInstall>
+    <QtModules>concurrent;core;gui;widgets;winextras</QtModules>
     <QtBuildConfig>debug</QtBuildConfig>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="QtSettings">
-    <QtInstall>Qt5.15x64</QtInstall>
+    <QtInstall>5.15.0_msvc2019_64</QtInstall>
     <QtModules>core;gui;widgets</QtModules>
     <QtBuildConfig>release</QtBuildConfig>
   </PropertyGroup>
@@ -68,18 +68,20 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>themes\dark\framelesswindow;themes\dark;.\;src\;.\src\core\provider;.\src\core;.\src\gui\scan;.\src\core\struct;.\src\core\model\cmd;.\src\gui\scan\controls;.\src\core\model;.\src\core\model\compare;.\src\settings;.\src\gui\config;.\src\core\debugger;.\src\core\process;.\src\core\global;.\src\core\module;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>themes\dark\framelesswindow;themes\dark;.\;src\;.\src\core\provider;.\src\core;.\src\gui\scan;.\src\core\struct;.\src\core\model\cmd;.\src\gui\scan\controls;.\src\core\model;.\src\core\model\compare;.\src\settings;.\src\gui\config;.\src\core\debugger;.\src\core\process;.\src\core\global;.\src\core\module;.\src\core\tracker;.\src\core\thread;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <DisableSpecificWarnings>4828; 4005</DisableSpecificWarnings>
       <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
+      <AdditionalLibraryDirectories>$(ProjectDir)libs\detours\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>detours.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>themes\dark\framelesswindow;themes\dark;.\;src\;.\src\core\provider;.\src\core;.\src\gui\scan;.\src\core\struct;.\src\core\model\cmd;.\src\gui\scan\controls;.\src\core\model;.\src\core\model\compare;.\src\settings;.\src\gui\config;.\src\core\debugger;.\src\core\process;.\src\core\global;.\src\core\module;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>themes\dark\framelesswindow;themes\dark;.\;src\;.\src\core\provider;.\src\core;.\src\gui\scan;.\src\core\struct;.\src\core\model\cmd;.\src\gui\scan\controls;.\src\core\model;.\src\core\model\compare;.\src\settings;.\src\gui\config;.\src\core\debugger;.\src\core\process;.\src\core\global;.\src\core\module;.\src\core\tracker;.\src\core\thread;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <DisableSpecificWarnings>4828</DisableSpecificWarnings>
     </ClCompile>
@@ -130,6 +132,8 @@
     <ClCompile Include="src\core\process\Process.cpp" />
     <ClCompile Include="src\core\provider\BEProvider.cpp" />
     <ClCompile Include="src\core\model\BEWorkspace.cpp" />
+    <ClCompile Include="src\core\thread\BEThreadInfo.cpp" />
+    <ClCompile Include="src\core\tracker\OpcodeTracker.cpp" />
     <ClCompile Include="src\gui\config\ConfigurationDialog.cpp" />
     <ClCompile Include="src\gui\config\ConfigurationScanWidget.cpp" />
     <ClCompile Include="src\gui\process\ProcessAttachDialog.cpp" />
@@ -228,6 +232,8 @@
     <ClInclude Include="src\core\symbol\symbol_types.h" />
     <ClInclude Include="src\core\symbol\symbol_undecorator.h" />
     <ClInclude Include="src\core\global\global.h" />
+    <QtMoc Include="src\core\tracker\OpcodeTracker.h" />
+    <QtMoc Include="src\core\thread\BEThreadInfo.h" />
     <ClInclude Include="src\settings\ScanSettings.h" />
     <ClInclude Include="src\undocument.h" />
     <ClInclude Include="src\utility\JsonMaker.h" />

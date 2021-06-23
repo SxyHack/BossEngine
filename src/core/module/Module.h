@@ -56,7 +56,7 @@ private:
 	static QString FormatDebugType(DWORD type);
 
 public:
-	// statics
+	// static
 	static Module* CreateModule(Process* process, const LOAD_DLL_DEBUG_INFO& loadDLL);
 
 public:

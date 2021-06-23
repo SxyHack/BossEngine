@@ -3,6 +3,9 @@
 #include <shlobj.h>
 #include <psapi.h>
 #include <QString>
+
+#pragma comment(lib, "Shlwapi.lib")
+
 /**
 \brief Number of allocated buffers by emalloc(). This should be 0 when x64dbg ends.
 */

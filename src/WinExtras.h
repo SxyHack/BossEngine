@@ -58,6 +58,11 @@ public:
 	// dwPID - 传入进程ID
 	//
 	BOOL EnumProcessModulesTH(IN DWORD dwPID, OUT LIST_MODULE& modules);
+
+	//
+	//
+	//
+	BOOL EnumProcessThreadTH(IN DWORD dwPID);
 	//
 	// 枚举进程的内存信息, 用来测试一波先
 	// IN hProcess: 进程句柄

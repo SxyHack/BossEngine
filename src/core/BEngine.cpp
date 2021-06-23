@@ -69,7 +69,9 @@ BOOL BEngine::OpenProcess(DWORD pid)
 	if (!_AttachProcess.NtOpen(pid))
 		return FALSE;
 
-	BEDebugger.Start(&_AttachProcess);
+	//BEDebugger.Start(&_AttachProcess);
+	//_AttachProcess.EnumThreads();
+
 	return TRUE;
 	//_AttachProcessID = pid;
 	//_AttachProcessHandle = ::OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);

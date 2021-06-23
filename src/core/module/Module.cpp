@@ -217,13 +217,18 @@ void Module::ListExports()
 		}
 
 		// prepare sorted vectors
-		_ExportSortByIndexName.reserve(_Exports.size());
-		_ExportSortByRVA.reserve(_Exports.size());
+		_ExportSortByIndexName.clear();
+		_ExportSortByRVA.clear();
 		for (size_t i = 0; i < _Exports.size(); i++)
 		{
-			_ExportSortByIndexName[i].index = i;
-			_ExportSortByIndexName[i].name = _Exports[i].Name;
-			_ExportSortByRVA[i] = i;
+			IndexName indexName;
+			indexName.index = i;
+			indexName.name = _Exports[i].Name;
+			_ExportSortByIndexName.push_back(indexName);
+			_ExportSortByRVA.push_back(i);
+			//_ExportSortByIndexName[i].index = i;
+			//_ExportSortByIndexName[i].name = _Exports[i].Name;
+			//_ExportSortByRVA[i] = i;
 		}
 
 		std::sort(_ExportSortByIndexName.begin(), _ExportSortByIndexName.end());
@@ -321,9 +326,9 @@ void Module::ListImports()
 		}
 
 		// prepare sorted vectors
-		_ImportSortByRVA.reserve(_Imports.size());
+		_ImportSortByRVA.clear();
 		for (size_t i = 0; i < _Imports.size(); i++)
-			_ImportSortByRVA[i] = i;
+			_ImportSortByRVA.push_back(i);
 
 		std::sort(_ImportSortByRVA.begin(), _ImportSortByRVA.end(), [=](size_t a, size_t b)
 			{
@@ -557,8 +562,8 @@ void Module::ReadDebugDir()
 	{
 		// Get the directory/filename from the debug directory PDB path
 		QFileInfo qfPdbFile(PdbFile);
-		QString dir = qfPdbFile.absolutePath();
-		QString file = qfPdbFile.completeBaseName();
+		QString fileDir = qfPdbFile.absolutePath();
+		QString fileName = qfPdbFile.baseName();
 
 		// TODO: this order is exactly the wrong way around :P
 		// It should be: symbol cache (by far the most likely location, also why it exists) -> PDB path in PE -> program directory.
@@ -567,14 +572,14 @@ void Module::ReadDebugDir()
 
 		// Symbol cache
 		QDir cachePath(GlobalCfg.GetSymbolCacheDir());
-		cachePath.cd(file);
+		cachePath.cd(fileName);
 		cachePath.cd(PdbSignature);
-		cachePath.cd(file);
+		cachePath.cd(fileName);
 		PdbPaths.push_back(cachePath.absolutePath());
 
 		// Debug directory full path
 		const bool bAllowUncPathsInDebugDirectory =
-			GlobalCfg.GetAllowUnicodePathInDebugDirectory(); // TODO: create setting for this
+			GlobalCfg.GetAllowUNCPathInDebugDirectory(); // TODO: create setting for this
 
 		WCHAR szPdbFile[MAX_FILE_PATH_SIZE]; 
 		PdbFile.toWCharArray(szPdbFile);
@@ -582,27 +587,16 @@ void Module::ReadDebugDir()
 			PdbPaths.push_back(PdbFile);
 
 		// Program directory (debug directory PDB name)
-		char pdbPath[MAX_PATH];
-		strcpy_s(pdbPath, Info.path);
-		auto lastBack = strrchr(pdbPath, '\\');
-		if (lastBack)
-		{
-			lastBack[1] = '\0';
-			strncat_s(pdbPath, file.c_str(), _TRUNCATE);
-			Info.pdbPaths.push_back(pdbPath);
-		}
+		PdbPaths.push_back(fileDir + QDir::separator() + fileName);
 
 		// Program directory (file name PDB name)
-		strcpy_s(pdbPath, Info.path);
-		lastBack = strrchr(pdbPath, '\\');
-		if (lastBack)
-		{
-			lastBack[1] = '\0';
-			strncat_s(pdbPath, Info.name, _TRUNCATE);
-			strncat_s(pdbPath, ".pdb", _TRUNCATE);
-			Info.pdbPaths.push_back(pdbPath);
-		}
+		PdbPaths.push_back(fileDir + QDir::separator() + fileName + ".pdb");
 	}
+}
+
+void Module::ReadExceptionDir()
+{
+
 }
 
 quint64 Module::RVAToOffset(quint64 base, quint64 rva)
@@ -610,8 +604,7 @@ quint64 Module::RVAToOffset(quint64 base, quint64 rva)
 	PIMAGE_SECTION_HEADER section = IMAGE_FIRST_SECTION(ImageNtHeaders);
 	for (WORD i = 0; i < ImageNtHeaders->FileHeader.NumberOfSections; ++i)
 	{
-		if (rva >= section->VirtualAddress &&
-			rva < section->VirtualAddress + section->SizeOfRawData)
+		if (rva >= section->VirtualAddress && rva < section->VirtualAddress + section->SizeOfRawData)
 		{
 			ASSERT_TRUE(rva != 0); // Following garbage in is garbage out, RVA 0 should always yield VA 0
 			return base + (rva - section->VirtualAddress) + section->PointerToRawData;
@@ -769,6 +762,7 @@ Module* Module::CreateModule(Process* process, const LOAD_DLL_DEBUG_INFO& loadDL
 	pModule->ListExports();
 	pModule->ListImports();
 	pModule->ListTLSCallbacks();
+	pModule->ReadDebugDir();
 
 	return pModule;
 }

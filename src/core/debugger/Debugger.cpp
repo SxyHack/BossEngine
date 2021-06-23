@@ -130,6 +130,8 @@ void Debugger::run()
 	{
 		ZeroMemory(&_DebugEvent, sizeof(DEBUG_EVENT));
 
+		auto handle = NtCurrentTeb()->DbgSsReserved[1];
+
 		// Fix based on work by https://github.com/number201724
 		if (!WaitForDebugEvent(&_DebugEvent, 100))
 		{

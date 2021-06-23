@@ -2,6 +2,7 @@
 
 #include <QPair>
 #include <QString>
+#include <Windows.h>
 
 #define MAX_MODULE_SIZE 1024
 
@@ -9,12 +10,6 @@ enum class MODULE_PARTY
 {
 	USER,
 	SYSTEM
-};
-
-enum class MODULE_TYPE
-{
-	DLL,
-	EXE
 };
 
 struct CV_HEADER
