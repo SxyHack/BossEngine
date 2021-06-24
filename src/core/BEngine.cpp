@@ -69,20 +69,14 @@ BOOL BEngine::OpenProcess(DWORD pid)
 	if (!_AttachProcess.NtOpen(pid))
 		return FALSE;
 
-	//BEDebugger.Start(&_AttachProcess);
 	_AttachProcess.EnumThreads();
 
 	return TRUE;
-	//_AttachProcessID = pid;
-	//_AttachProcessHandle = ::OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
-	//if (_AttachProcessHandle == NULL)
-	//{
-	//	_LastErrorCode = GetLastError();
-	//	_LastErrorMessage = _WinExtras.FormatLastError(_LastErrorCode);
-	//	qCritical("OpenProcess[%d] failed, ERROR:0x%x", pid, _LastErrorCode);
-	//	return FALSE;
-	//}
-	//return EnumModules();
+}
+
+void BEngine::CloseProcess()
+{
+	_AttachProcess.Close();
 }
 
 HANDLE BEngine::GetProcessHandle()

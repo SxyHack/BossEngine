@@ -17,6 +17,7 @@ enum class ARCH
 };
 
 class EnumThreadWorker;
+class BEThreadTracker;
 
 
 class Process : public QObject
@@ -30,8 +31,9 @@ public:
 	BOOL Open(DWORD dwPID);
 	BOOL NtOpen(DWORD dwPID);
 	BOOL IsOpen();
-
 	BOOL Close();
+
+	BOOL IsWow64();
 
 	//
 	// 隐式转换, 返回进程句柄
@@ -64,7 +66,6 @@ public:
 	// 枚举所有线程
 	//
 	void EnumThreads();
-	void StartThreadTrack();
 
 public:
 	static ARCH GetPEArch(const QString& qsFileName);
@@ -73,13 +74,15 @@ public:
 
 public:
 	DWORD PID;
+	DWORD MainTID; // 主线程ID
 
 private:
-	HANDLE     _Handle;
-	DWORD      _Error;
-	QString    _ErrMessage;
-	MAP_MOUDLE _MoudleMap;
-	MAP_THREAD _ThreadMap;
+	HANDLE      _Handle;
+	DWORD       _Error;
+	QString     _ErrMessage;
+	MAP_MOUDLE  _MoudleMap;
+	MAP_THREAD  _ThreadMap;
+	QList<quint64> _ThreadIDs;
 
 	EnumThreadWorker* _EnumThread;
 };

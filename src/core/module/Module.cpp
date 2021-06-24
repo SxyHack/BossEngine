@@ -700,17 +700,17 @@ QString Module::FormatDebugType(DWORD type)
 	}
 }
 
-Module* Module::CreateModule(Process* process, const LOAD_DLL_DEBUG_INFO& loadDLL)
+Module* Module::CreateModule(Process* process, LPVOID lpBaseOfDLL)
 {
 	TCHAR szMappedPath[MAX_FILE_PATH_SIZE] = { 0 };
 
-	auto dllBase = loadDLL.lpBaseOfDll;
+	auto dllBase = lpBaseOfDLL;
 	auto hProcess = process->Handle();
 	auto pModule = new Module;
 
 	pModule->ModBase = quint64(dllBase);
 
-	// 得到Module的文件全路径
+	// 寰楀埌Module鐨勬枃浠跺叏璺緞
 	if (!GetMappedFileName(hProcess, dllBase, szMappedPath, MAX_FILE_PATH_SIZE))
 	{
 		qWarning("GetMappedFileName failed.");

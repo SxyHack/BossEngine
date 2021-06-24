@@ -17,6 +17,9 @@ protected:
     void SetupStatusBar();
     void AddScanPage();
 
+protected:
+    void closeEvent(QCloseEvent* event) override;
+
 private slots:
     void OnActionOpenProcess(bool checked);
     void OnActionOpenConfig(bool checked);

@@ -4,6 +4,7 @@
 #include "gui/config/ConfigurationDialog.h"
 
 #include <QMessageBox>
+#include <QCloseEvent>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -58,6 +59,12 @@ void MainWindow::AddScanPage()
     connect(page, &ScanTabPage::ES_MemoryScanStarted, this, &MainWindow::OnMemoryScanStarted, Qt::QueuedConnection);
     connect(page, &ScanTabPage::ES_MemoryScanDone, this, &MainWindow::OnMemoryScanDone, Qt::QueuedConnection);
     connect(page, &ScanTabPage::ES_MemoryFoundValue, this, &MainWindow::OnMemoryFoundValue, Qt::QueuedConnection);
+}
+
+void MainWindow::closeEvent(QCloseEvent* event)
+{
+    Engine.CloseProcess();
+    QMainWindow::closeEvent(event);
 }
 
 void MainWindow::OnActionOpenProcess(bool checked)

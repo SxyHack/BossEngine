@@ -30,6 +30,7 @@ public:
 	// 打开进程, 准备扫描或者读写
 	// 
 	BOOL OpenProcess(DWORD pid);
+	void CloseProcess();
 	HANDLE GetProcessHandle();
 
 	//////////////////////////////////////////////////////////////////////////

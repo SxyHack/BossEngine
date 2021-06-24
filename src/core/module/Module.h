@@ -57,7 +57,7 @@ private:
 
 public:
 	// static
-	static Module* CreateModule(Process* process, const LOAD_DLL_DEBUG_INFO& loadDLL);
+	static Module* CreateModule(Process* process, LPVOID lpBaseOfDLL);
 
 public:
 	quint64           ModBase; // Module base

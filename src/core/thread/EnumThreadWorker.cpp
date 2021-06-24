@@ -1,6 +1,7 @@
 #include "EnumThreadWorker.h"
 #include "Process.h"
 #include "WinExtras.h"
+#include "BEThreadTracker.h"
 
 EnumThreadWorker::EnumThreadWorker(Process* process)
 	: QThread(nullptr)
@@ -17,6 +18,7 @@ EnumThreadWorker::EnumThreadWorker()
 
 EnumThreadWorker::~EnumThreadWorker()
 {
+	Stop();
 }
 
 void EnumThreadWorker::SetProcess(Process* process)
@@ -26,8 +28,15 @@ void EnumThreadWorker::SetProcess(Process* process)
 
 void EnumThreadWorker::Stop()
 {
+	if (isInterruptionRequested()) {
+		qWarning("Already stop.");
+		return;
+	}
+
+	qDebug("Stopping...");
 	requestInterruption();
 	_ExitSE.tryAcquire(1, 1000L);
+	qInfo("Stopped");
 }
 
 void EnumThreadWorker::run()
@@ -50,26 +59,31 @@ void EnumThreadWorker::run()
 
 	while (!isInterruptionRequested())
 	{
-		quint64 count = 0;
+		quint64 threadCount = 0;
 
-		_Process->RemoveThreads();
 		ret = Thread32First(hSnap, &tlh32Entry);
 		do
 		{
 			if (tlh32Entry.th32OwnerProcessID == _Process->PID)
 			{
-				_Process->AppendThread(new BEThread(tlh32Entry));
-				count++;
+				if (!_Process->ThreadIsExist(tlh32Entry.th32ThreadID))
+				{
+					auto pThread = new BEThread(tlh32Entry, _Process);
+					_Process->AppendThread(pThread);
+					threadCount++;
+				}
+
+				//qDebug("发现线程[%d]", tlh32Entry.th32ThreadID);
 			}
 		} while (ret = Thread32Next(hSnap, &tlh32Entry));
 
-		qDebug("发现线程: %d", count);
+		if (threadCount > 0)
+			qDebug("线程总数: %d", threadCount);
+
 		QThread::msleep(500);
 	}
 
 	CloseHandle(hSnap);
-
 	_ExitSE.release();
-
 	qDebug("Exit Thread");
 }

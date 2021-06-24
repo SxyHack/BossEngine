@@ -2,6 +2,7 @@
 #include "WinExtras.h"
 #include "libs/ntdll/ntdll.h"
 #include "EnumThreadWorker.h"
+#include "BEThreadTracker.h"
 
 #include <QFile>
 #include <QMutex>
@@ -21,10 +22,6 @@ Process::Process() : QObject(nullptr)
 
 Process::~Process()
 {
-	if (_EnumThread) {
-		_EnumThread->Stop();
-		delete _EnumThread;
-	}
 }
 
 BOOL Process::Open(DWORD dwPID)
@@ -80,7 +77,32 @@ BOOL Process::IsOpen()
 
 BOOL Process::Close()
 {
-	return NT_SUCCESS(NtClose(_Handle));
+	if (_EnumThread != nullptr)
+	{
+		delete _EnumThread;
+		_EnumThread = nullptr;
+	}
+
+	// 关闭所有线程监控
+	for (auto pThread : _ThreadMap)
+	{
+		delete pThread;
+	}
+
+	_ThreadMap.clear();
+	NtClose(_Handle);
+
+	qDebug("Process[%d] closed", PID);
+	return TRUE;
+}
+
+BOOL Process::IsWow64()
+{
+	BOOL bIsWow64 = FALSE;
+	if (!IsWow64Process(_Handle, &bIsWow64))
+		return FALSE;
+
+	return bIsWow64;
 }
 
 Process::operator HANDLE()
@@ -108,6 +130,7 @@ void Process::AppendThread(BEThread* pThread)
 		return;
 
 	_ThreadMap.insert(pThread->ThreadID, pThread);
+	_ThreadIDs.append(pThread->ThreadID);
 }
 
 void Process::RemoveThread(quint64 tid)
@@ -116,6 +139,7 @@ void Process::RemoveThread(quint64 tid)
 
 	if (_ThreadMap.contains(tid))
 	{
+		_ThreadIDs.removeOne(tid);
 		auto pThread = _ThreadMap.take(tid);
 		delete pThread;
 	}
@@ -131,6 +155,7 @@ void Process::RemoveThreads()
 	}
 
 	_ThreadMap.clear();
+	_ThreadIDs.clear();
 }
 
 bool Process::ThreadIsExist(quint64 tid)
@@ -141,12 +166,10 @@ bool Process::ThreadIsExist(quint64 tid)
 
 void Process::EnumThreads()
 {
+	if (_EnumThread->isRunning())
+		return;
+
 	_EnumThread->start(QThread::HighPriority);
-}
-
-void Process::StartThreadTrack()
-{
-
 }
 
 ARCH Process::GetPEArch(const QString& qsFileName)

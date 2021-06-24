@@ -254,7 +254,7 @@ void Debugger::run()
 
 DWORD Debugger::HandleLoadDLL()
 {
-	_Process->AppendModule(Module::CreateModule(_Process, _DebugEvent.u.LoadDll));
+	_Process->AppendModule(Module::CreateModule(_Process, _DebugEvent.u.LoadDll.lpBaseOfDll));
 
 	return DBG_CONTINUE;
 }
