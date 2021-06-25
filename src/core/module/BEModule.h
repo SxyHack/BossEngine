@@ -18,6 +18,9 @@ public:
 	static BEModule* Create(Process* pProc, const MODULEENTRY32& tlh32Entry);
 
 public:
+	quint32           ID;         // 模块ID
+	quint64           OwnPID;     // 进程ID
+	HMODULE           Handle;     // 模块句柄
 	quint64           ModBase;    // Module base
 	quint64           ModSize;    // Module size
 	quint64           EntryPoint; // Entry point
