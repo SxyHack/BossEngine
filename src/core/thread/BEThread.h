@@ -9,6 +9,9 @@
 #define CONTEXT_EXTENDED_REGISTERS 0
 #endif
 
+typedef QMap<quint64, quint64> MAP_RIP;
+typedef QList<quint64>         LIST_RIP;
+
 class Process;
 class BEThreadTracker;
 //
@@ -27,8 +30,8 @@ public:
 public:
 	THREADENTRY32 Tlh32Entry;
 	quint64       ThreadID;
-	BOOL          bCanSuspend;  // 调用SuspendThread是否能成功
 	CONTEXT       Context;
+	MAP_RIP       MapRip;
 
 private:
 	Process*         _Process;

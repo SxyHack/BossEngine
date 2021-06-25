@@ -2,6 +2,8 @@
 #include "WinExtras.h"
 #include "libs/ntdll/ntdll.h"
 #include "EnumThreadWorker.h"
+#include "EnumModuleWorker.h"
+
 #include "BEThreadTracker.h"
 
 #include <QFile>
@@ -17,6 +19,7 @@ Process::Process() : QObject(nullptr)
 , _Handle(NULL)
 , _Error(0)
 , _EnumThread(new EnumThreadWorker(this))
+, _EnumModule(new EnumModuleWorker(this))
 {
 }
 
@@ -77,10 +80,16 @@ BOOL Process::IsOpen()
 
 BOOL Process::Close()
 {
-	if (_EnumThread != nullptr)
+	if (_EnumThread)
 	{
 		delete _EnumThread;
 		_EnumThread = nullptr;
+	}
+
+	if (_EnumModule)
+	{
+		delete _EnumModule;
+		_EnumModule = nullptr;
 	}
 
 	// 关闭所有线程监控
@@ -119,7 +128,42 @@ void Process::AppendModule(Module* pMod)
 {
 	QMutexLocker lock(&mxAppendMod);
 
-	_MoudleMap.insert(QRange(pMod->ModBase, pMod->ModBase + pMod->ModSize - 1), pMod);
+	if (_ModuleNameMap.contains(pMod->FileName))
+		return;
+
+	_ModuleNameMap.insert(pMod->FileName, pMod);
+	_ModuleRangeMap.insert(QRange(pMod->ModBase, pMod->ModBase + pMod->ModSize - 1), pMod);
+	_ModuleNameList.append(pMod->FileName);
+}
+
+bool Process::ModuleIsExist(const QString& name)
+{
+	QMutexLocker lock(&mxAppendMod);
+	
+	return _ModuleNameMap.contains(name);
+}
+
+quint64 Process::GetModuleCount()
+{
+	return _ModuleNameMap.count();
+}
+
+Module* Process::GetModule(int i)
+{
+	auto key = _ModuleNameList.at(i);
+	if (_ModuleNameMap.contains(key))
+		return _ModuleNameMap.value(key);
+
+	return nullptr;
+}
+
+void Process::StartEnumModuleWorker()
+{
+	if (_EnumModule->isRunning())
+		return;
+
+	_EnumModule->start(QThread::NormalPriority);
+	_EnumModule->WaitForInit();
 }
 
 void Process::AppendThread(BEThread* pThread)
@@ -164,12 +208,12 @@ bool Process::ThreadIsExist(quint64 tid)
 	return _ThreadMap.contains(tid);
 }
 
-void Process::EnumThreads()
+void Process::StartEnumThreadWorker()
 {
 	if (_EnumThread->isRunning())
 		return;
 
-	_EnumThread->start(QThread::HighPriority);
+	_EnumThread->start(QThread::NormalPriority);
 }
 
 ARCH Process::GetPEArch(const QString& qsFileName)

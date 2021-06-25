@@ -33,11 +33,13 @@ class Module : public QObject
 
 public:
 	Module();
+	Module(const Module& src);
 	~Module();
 
 private:
 	//
-	// 初始化 ImageNtHeaders. 确保ModBase, ModSize已经初始化
+	// 初始化 ImageNtHeaders. 
+	// 确保 ModBase, ModSize, MappingVA 已经成功解析
 	//
 	NTSTATUS InitImageNtHeader();
 	//
@@ -58,16 +60,18 @@ private:
 public:
 	// static
 	static Module* CreateModule(Process* process, LPVOID lpBaseOfDLL);
+	static Module* Create(Process* pProc, const MODULEENTRY32& tlh32Entry);
 
 public:
 	quint64           ModBase; // Module base
 	quint64           ModSize; // Module size
 	quint64           Entry;   // Entry point
-	quint64           Hash;    // Full module name hash
 	quint64           ImageBaseHeader;  // ImageBase field in OptionalHeader
+	quint64           FileHash;    // Full module name hash
 	QString           FilePath;  // 完整路径, 包括文件名字和扩展名, 比如: c:\windows\ntdll.dll
 	QString           FileName;  // 文件名, 比如: ntdll.dll
 	QString           FileExt;   // 文件扩展名, 比如: dll
+	quint64           FileSize;  // 文件大小
 	quint64           MappingVA;
 	PIMAGE_NT_HEADERS ImageNtHeaders;
 	MODULE_PARTY      Party;
@@ -95,4 +99,8 @@ protected:
 };
 
 
-typedef QMap<QRange, Module*> MAP_MOUDLE;
+typedef QMap<QRange, Module*> RANGE_MAP_MOUDLE;
+typedef QMap<QString, Module*> NAME_MAP_MODULE;
+
+
+Q_DECLARE_METATYPE(Module);

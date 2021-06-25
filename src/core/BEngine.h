@@ -32,12 +32,13 @@ public:
 	BOOL OpenProcess(DWORD pid);
 	void CloseProcess();
 	HANDLE GetProcessHandle();
+	Process* GetProcess();
 
 	//////////////////////////////////////////////////////////////////////////
 	// 
 	// 枚举打开进程的所有模块, 需要先调用 OpenProcess.
 	//
-	BOOL EnumModules();
+	//BOOL EnumModules();
 	LIST_MODULE& GetModules();
 	//
 	// 将模块添加到_IncludeModules数组, 用来在搜索内容线程中使用

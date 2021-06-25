@@ -17,6 +17,8 @@ enum class ARCH
 };
 
 class EnumThreadWorker;
+class EnumModuleWorker;
+
 class BEThreadTracker;
 
 
@@ -49,7 +51,10 @@ public:
 	// Modules
 	//
 	void AppendModule(Module* pMod);
-
+	bool ModuleIsExist(const QString& name);
+	quint64 GetModuleCount();
+	Module* GetModule(int i);
+	void StartEnumModuleWorker();
 	//
 	// Threads
 	// 添加线程到Map
@@ -65,7 +70,7 @@ public:
 	//
 	// 枚举所有线程
 	//
-	void EnumThreads();
+	void StartEnumThreadWorker();
 
 public:
 	static ARCH GetPEArch(const QString& qsFileName);
@@ -74,15 +79,18 @@ public:
 
 public:
 	DWORD PID;
-	DWORD MainTID; // 主线程ID
 
 private:
-	HANDLE      _Handle;
-	DWORD       _Error;
-	QString     _ErrMessage;
-	MAP_MOUDLE  _MoudleMap;
-	MAP_THREAD  _ThreadMap;
-	QList<quint64> _ThreadIDs;
+	HANDLE            _Handle;
+	DWORD             _Error;
+	QString           _ErrMessage;
+	RANGE_MAP_MOUDLE  _ModuleRangeMap;
+	NAME_MAP_MODULE   _ModuleNameMap;
+	QList<QString>    _ModuleNameList;  // 模块有序列表
+
+	MAP_THREAD        _ThreadMap;
+	QList<quint64>    _ThreadIDs;
 
 	EnumThreadWorker* _EnumThread;
+	EnumModuleWorker* _EnumModule;
 };

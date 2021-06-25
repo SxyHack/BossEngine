@@ -51,7 +51,7 @@ ScanTabPage::ScanTabPage(QWidget* parent)
 	connect(&_Workspace, &BEWorkspace::ES_FoundPointer, this, &ScanTabPage::OnFoundPointer, Qt::QueuedConnection);
 
 	connect(&_ScanningTimer, &QTimer::timeout, this, &ScanTabPage::OnTimeProcScanning);
-	connect(&_UpdateTimer,   &QTimer::timeout, this, &ScanTabPage::OnTimeProcUpdateResults);
+	connect(&_UpdateTimer, &QTimer::timeout, this, &ScanTabPage::OnTimeProcUpdateResults);
 
 	//
 	// UI默认设置
@@ -167,14 +167,14 @@ void ScanTabPage::SetupFoundTableMenu()
 	pAction = _MenuFoundTable.addAction(QIcon(":/MAIN/resources/Icons/copy128x128.png"), "复制地址");
 	connect(pAction, &QAction::triggered, this, &ScanTabPage::OnActionFoundTableCopyAddress);
 	_MenuFoundTable.addSeparator();
-	
+
 	_MenuFoundTable.addAction(QIcon(":/MAIN/resources/Icons/x128x128.png"), "删除条目");
-	
+
 	_MenuFoundTable.addSeparator();
-	
+
 	_MenuFoundTable.addAction("显示反汇编");
 	_MenuFoundTable.addAction("显示内存");
-	
+
 	_MenuFoundTable.addSeparator();
 
 	pAction = _MenuFoundTable.addAction("16进制");
@@ -190,7 +190,7 @@ void ScanTabPage::AppendFoundPointer(BEPointer* pPtr)
 	QString moduleName;
 	auto ulOffset = Engine.QueryStaticAddress(pPtr->Address, moduleName);
 
-	auto qsAddr = ulOffset < 0 
+	auto qsAddr = ulOffset < 0
 		? QString::number(pPtr->Address, 16).toUpper()
 		: QString("%1+%2").arg(moduleName).arg(QString::number(ulOffset, 16).toUpper());
 	auto itemAddr = new QTableWidgetItem(qsAddr);
@@ -212,22 +212,23 @@ void ScanTabPage::AppendFoundPointer(BEPointer* pPtr)
 
 void ScanTabPage::ShowModules()
 {
-	WinExtras winExtras;
-	auto      modules = Engine.GetModules();
-	QString   qsSystemDir = winExtras.GetSystemDir();
-	DWORD     dwReverseRow = modules.length() - 1;
+	auto      pProc = Engine.GetProcess();
+	quint64   dwModuleCount = pProc->GetModuleCount();
+	QString   qsSystemDir = WinExtras::GetSystemDir();
+	DWORD     dwReverseRow = dwModuleCount - 1;
 	DWORD     dwRow = 0;
 
-	ui.ModuleTable->setRowCount(modules.length());
+	ui.ModuleTable->setRowCount(dwModuleCount);
 
-	for (auto& mod : modules)
+	for (int i = 0; i < dwModuleCount; i++)
 	{
-		// + 变量定义
-		QString qsExeFile = QString::fromWCharArray(mod.szExePath);
-		QString qsModName = QString::fromWCharArray(mod.szModule);
-		QFileInfo qfi(qsExeFile);
+		auto pModule = pProc->GetModule(i);
+		if (pModule == nullptr)
+			continue;
 
-		bool    bSystemDll = true;
+		// + 变量定义
+		QFileInfo qfi(pModule->FilePath);
+		bool    bSystemDLL = pModule->Party == MODULE_PARTY::SYSTEM;
 		QString qsExePath = QDir::toNativeSeparators(qfi.absolutePath());
 		QColor  color = Qt::gray;
 		DWORD   dwPos = 0;
@@ -236,36 +237,34 @@ void ScanTabPage::ShowModules()
 		// 判断哪些是应用程序模块, 哪些是系统自带的模块.
 		// 主要根据是DLL的路径来进行判断, 位于c:\windows\system的下的文件,
 		// 判定为系统DLL
-		if (!qsExePath.contains(qsSystemDir, Qt::CaseInsensitive))
+		if (!bSystemDLL)
 		{
 			dwPos = dwRow++;
 			color = Qt::green;
-			bSystemDll = false;
 		}
 		else
 		{
-			bSystemDll = true;
 			dwPos = dwReverseRow--;
 		}
 
-		auto itModName = new QTableWidgetItem(qsModName);
+		auto itModName = new QTableWidgetItem(pModule->FileName);
 		itModName->setFlags(Qt::ItemIsEnabled | Qt::ItemIsUserCheckable);
 		itModName->setTextColor(color);
-		itModName->setToolTip(qsExeFile);
-		itModName->setCheckState(bSystemDll ? Qt::Unchecked : Qt::Checked);
-		itModName->setData(MODULE_SYSTEM_DLL, bSystemDll);
-		itModName->setData(MODULE_DATA, JsonMaker::MakeWith(mod));
+		itModName->setToolTip(pModule->FilePath);
+		itModName->setCheckState(bSystemDLL ? Qt::Unchecked : Qt::Checked);
+		itModName->setData(MODULE_SYSTEM_DLL, bSystemDLL);
+		itModName->setData(MODULE_DATA, QVariant::fromValue(pModule));
 
 		ui.ModuleTable->setItem(dwPos, 0, itModName);
 
-		auto qsBaseAddr = QString::number((DWORD64)mod.modBaseAddr, 16).toUpper();
+		auto qsBaseAddr = QString::number((DWORD64)pModule->ModBase, 16).toUpper();
 		auto itBaseAddr = new QTableWidgetItem(qsBaseAddr);
 		itBaseAddr->setTextColor(color);
 		itBaseAddr->setFlags(Qt::ItemIsEnabled | Qt::ItemIsEditable);
 
 		ui.ModuleTable->setItem(dwPos, 1, itBaseAddr);
 
-		DWORD64 dwEndAddr = (DWORD64)mod.modBaseAddr + mod.modBaseSize;
+		DWORD64 dwEndAddr = (DWORD64)pModule->ModBase + pModule->ModSize;
 		auto qsEndAddr = QString::number(dwEndAddr, 16).toUpper();
 		auto itEndAddr = new QTableWidgetItem(qsEndAddr);
 		itEndAddr->setTextColor(color);
@@ -426,9 +425,9 @@ void ScanTabPage::OnButtonScan()
 		auto item = ui.ModuleTable->item(i, 0);
 		if (item->checkState() == Qt::Checked)
 		{
-			auto& json = item->data(MODULE_DATA).toJsonObject();
-			JsonMaker::ReturnTo(json, mod);
-			Engine.IncludeModule(mod);
+			auto pModule = item->data(MODULE_DATA).value<Module*>();
+			//JsonMaker::ReturnTo(json, mod);
+			//Engine.IncludeModule(mod);
 		}
 	}
 
@@ -509,7 +508,7 @@ void ScanTabPage::OnActionFoundTableCopyAddress(bool checked)
 	auto clip = QApplication::clipboard();
 	if (clip == nullptr)
 		return;
-	
+
 	auto items = ui.FoundTable->selectedItems();
 	if (items.isEmpty())
 		return;

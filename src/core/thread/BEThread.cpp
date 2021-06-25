@@ -5,7 +5,6 @@ BEThread::BEThread(THREADENTRY32& tlh32, Process* pProcess)
 	: QObject(nullptr)
 	, Tlh32Entry(tlh32)
 	, ThreadID(tlh32.th32ThreadID)
-	, bCanSuspend(TRUE)
 	, _Process(pProcess)
 	, _Tracker(new BEThreadTracker(this, pProcess))
 {
@@ -26,4 +25,5 @@ void BEThread::StartTrack()
 		return;
 
 	_Tracker->start(QThread::HighPriority);
+	qDebug("启动线程[%d]...", Tlh32Entry.th32ThreadID);
 }

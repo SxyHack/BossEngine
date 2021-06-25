@@ -63,6 +63,7 @@ void MainWindow::AddScanPage()
 
 void MainWindow::closeEvent(QCloseEvent* event)
 {
+    this->hide();
     Engine.CloseProcess();
     QMainWindow::closeEvent(event);
 }

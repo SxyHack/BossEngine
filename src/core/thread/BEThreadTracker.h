@@ -6,6 +6,8 @@
 class BEThread;
 class Process;
 
+typedef QList<CONTEXT> LIST_THREAD_FRAME;
+
 class BEThreadTracker : public QThread
 {
 	Q_OBJECT
@@ -23,4 +25,7 @@ protected:
 	BEThread*  _Thread;
 	Process*   _Process;
 	QSemaphore _ExitThreadSemaphore; // 退出线程信号
+	quint64    _LastRip;
+
+	LIST_THREAD_FRAME _ListThreadFrame;
 };

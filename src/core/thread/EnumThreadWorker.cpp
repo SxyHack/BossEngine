@@ -35,14 +35,15 @@ void EnumThreadWorker::Stop()
 
 	qDebug("Stopping...");
 	requestInterruption();
-	_ExitSE.tryAcquire(1, 1000L);
+	if (_ExitSE.tryAcquire(1, 1000L))
+		_ExitSE.release();
 	qInfo("Stopped");
 }
 
 void EnumThreadWorker::run()
 {
-	BOOL ret = FALSE;
-	THREADENTRY32 tlh32Entry = { 0 };
+	THREADENTRY32 tlh32Entry;
+	ZeroMemory(&tlh32Entry, sizeof(THREADENTRY32));
 	tlh32Entry.dwSize = sizeof(THREADENTRY32);
 
 	HANDLE hSnap = ::CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, _Process->PID);
@@ -50,8 +51,8 @@ void EnumThreadWorker::run()
 	{
 		DWORD dwLastError = GetLastError();
 		auto message = WinExtras::FormatLastError(dwLastError);
-		qWarning("CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD) FAIL, 0x%08X %s", 
-			dwLastError, 
+		qWarning("CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD) FAIL, 0x%08X %s",
+			dwLastError,
 			message.toUtf8().data());
 		_ExitSE.release();
 		return;
@@ -60,8 +61,7 @@ void EnumThreadWorker::run()
 	while (!isInterruptionRequested())
 	{
 		quint64 threadCount = 0;
-
-		ret = Thread32First(hSnap, &tlh32Entry);
+		BOOL ret = Thread32First(hSnap, &tlh32Entry);
 		do
 		{
 			if (tlh32Entry.th32OwnerProcessID == _Process->PID)
@@ -69,11 +69,12 @@ void EnumThreadWorker::run()
 				if (!_Process->ThreadIsExist(tlh32Entry.th32ThreadID))
 				{
 					auto pThread = new BEThread(tlh32Entry, _Process);
+					//if (threadCount == 0)
+					//pThread->StartTrack();
+
 					_Process->AppendThread(pThread);
 					threadCount++;
 				}
-
-				//qDebug("发现线程[%d]", tlh32Entry.th32ThreadID);
 			}
 		} while (ret = Thread32Next(hSnap, &tlh32Entry));
 
@@ -84,6 +85,6 @@ void EnumThreadWorker::run()
 	}
 
 	CloseHandle(hSnap);
+	qDebug("Exit EnumThread");
 	_ExitSE.release();
-	qDebug("Exit Thread");
 }

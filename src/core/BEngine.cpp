@@ -69,7 +69,8 @@ BOOL BEngine::OpenProcess(DWORD pid)
 	if (!_AttachProcess.NtOpen(pid))
 		return FALSE;
 
-	_AttachProcess.EnumThreads();
+	_AttachProcess.StartEnumModuleWorker();
+	_AttachProcess.StartEnumThreadWorker();
 
 	return TRUE;
 }
@@ -84,18 +85,23 @@ HANDLE BEngine::GetProcessHandle()
 	return _AttachProcessHandle;
 }
 
-BOOL BEngine::EnumModules()
+Process* BEngine::GetProcess()
 {
-	_AttachProcessModules.clear();
-	// 查询模块
-	if (!_WinExtras.EnumProcessModulesTH(_AttachProcessID, _AttachProcessModules))
-	{
-		qCritical("QueryProcessModulesTH Failed");
-		return FALSE;
-	}
-
-	return TRUE;
+	return &_AttachProcess;
 }
+
+//BOOL BEngine::EnumModules()
+//{
+//	_AttachProcessModules.clear();
+//	// 查询模块
+//	if (!_WinExtras.EnumProcessModulesTH(_AttachProcessID, _AttachProcessModules))
+//	{
+//		qCritical("QueryProcessModulesTH Failed");
+//		return FALSE;
+//	}
+//
+//	return TRUE;
+//}
 
 LIST_MODULE& BEngine::GetModules()
 {

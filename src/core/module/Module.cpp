@@ -14,13 +14,47 @@
 Module::Module() : QObject(nullptr)
 , ModBase(0)
 , ModSize(0)
-, Hash(0)
+, FileHash(0)
 , Entry(0)
 , ImageBaseHeader(0)
 , MappingVA(0)
 , ImageNtHeaders(NULL)
 , Party(MODULE_PARTY::USER)
+, FileSize(0)
 {
+}
+
+Module::Module(const Module& src) : QObject(nullptr)
+, ModBase(src.ModBase)
+, ModSize(src.ModSize)
+, FileHash(src.FileHash)
+, Entry(src.Entry)
+, ImageBaseHeader(src.ImageBaseHeader)
+, MappingVA(src.MappingVA)
+, ImageNtHeaders(src.ImageNtHeaders)
+, Party(src.Party)
+, FileSize(src.FileSize)
+{
+	FilePath = src.FilePath;
+	FileName = src.FileName;
+	FileExt = src.FileExt;
+	ExportOrdinalBase = src.ExportOrdinalBase;
+	PdbSignature = src.PdbSignature;
+	PdbFile = src.PdbFile;
+	PdbValidation = src.PdbValidation;
+	PdbPaths = src.PdbPaths;
+
+	_Sections = src._Sections;
+	_Exports = src._Exports;
+	_ExportSortByIndexName = src._ExportSortByIndexName;
+	_ExportSortByRVA = src._ExportSortByRVA;
+
+	_ImportModules = src._ImportModules;
+	_Imports = src._Imports;
+	_ImportSortByRVA = src._ImportSortByRVA;
+
+	_ListTLS = src._ListTLS;
+	_Relocations = src._Relocations;
 }
 
 Module::~Module()
@@ -90,16 +124,24 @@ void Module::ListPESection()
 
 	auto numberOfSections = ImageNtHeaders->FileHeader.NumberOfSections;
 
+	QString qsLog = "Sections: \n";
+
 	for (int i = 0; i < numberOfSections; i++)
 	{
 		ModuleSection section;
 		section.Address = pNtSection->VirtualAddress + ModBase;
 		section.Size = pNtSection->Misc.VirtualSize;
 		section.Name = QString::fromLocal8Bit((char*)pNtSection->Name, IMAGE_SIZEOF_SHORT_NAME);
-		qDebug("%s: %p(%d)", section.Name.toUtf8().data(), section.Address, section.Size);
+
+		qsLog += QString().sprintf("\t%s: %p(%d)\n", 
+			section.Name.toUtf8().data(),
+			section.Address,
+			section.Size);
 		_Sections.push_back(section);
 		pNtSection++;
 	}
+
+	qDebug(qsLog.toUtf8().data());
 }
 
 void Module::ListExports()
@@ -765,4 +807,57 @@ Module* Module::CreateModule(Process* process, LPVOID lpBaseOfDLL)
 	pModule->ReadDebugDir();
 
 	return pModule;
+}
+
+Module* Module::Create(Process* pProc, const MODULEENTRY32& tlh32Entry)
+{
+	auto pModule = new Module;
+	pModule->FilePath = QString::fromWCharArray(tlh32Entry.szExePath);
+	pModule->FileName = QString::fromWCharArray(tlh32Entry.szModule);
+	pModule->ModBase = quint64(tlh32Entry.modBaseAddr);
+	pModule->ModSize = tlh32Entry.modBaseSize;
+
+	qDebug("Load: %s", pModule->FilePath.toUtf8().data());
+
+	QFileInfo fiMod(pModule->FilePath);
+	pModule->FileExt = fiMod.suffix();
+
+	auto qsSystemDir = WinExtras::GetSystemDir();
+	pModule->Party = pModule->FilePath.contains(qsSystemDir, Qt::CaseInsensitive)
+		? MODULE_PARTY::SYSTEM
+		: MODULE_PARTY::USER;
+
+	QFile qfModule(pModule->FilePath);
+	if (qfModule.open(QIODevice::ReadOnly))
+	{
+		pModule->FileSize = qfModule.size();
+		pModule->MappingVA = (quint64)qfModule.map(0, pModule->FileSize);
+	}
+	else
+	{
+		pModule->FileSize = 0;
+		pModule->MappingVA = 0;
+	}
+
+	// Get the PE headers
+	if (!NT_SUCCESS(pModule->InitImageNtHeader()))
+	{
+		auto name = fiMod.baseName();
+		auto ext = fiMod.suffix();
+		qCritical("Module %s%s: invalid PE file!", name.toUtf8().data(), ext.toUtf8().data());
+		qfModule.close();
+		return nullptr;
+	}
+
+	//// Enumerate all PE sections
+	//pModule->ListPESection();
+	//pModule->ListExports();
+	//pModule->ListImports();
+	//pModule->ListTLSCallbacks();
+	//pModule->ReadDebugDir();
+
+	qfModule.close();
+
+	return pModule;
+
 }
