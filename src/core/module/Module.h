@@ -24,7 +24,6 @@
         ? ((PIMAGE_THUNK_DATA32)(Ptr))->Val \
         : 0))
 
-
 class Process;
 
 class Module : public QObject
@@ -63,15 +62,15 @@ public:
 	static Module* Create(Process* pProc, const MODULEENTRY32& tlh32Entry);
 
 public:
-	quint64           ModBase; // Module base
-	quint64           ModSize; // Module size
-	quint64           Entry;   // Entry point
-	quint64           ImageBaseHeader;  // ImageBase field in OptionalHeader
-	quint64           FileHash;    // Full module name hash
-	QString           FilePath;  // 完整路径, 包括文件名字和扩展名, 比如: c:\windows\ntdll.dll
-	QString           FileName;  // 文件名, 比如: ntdll.dll
-	QString           FileExt;   // 文件扩展名, 比如: dll
-	quint64           FileSize;  // 文件大小
+	quint64           ModBase;    // Module base
+	quint64           ModSize;    // Module size
+	quint64           Entry;      // Entry point
+	quint64           ImageBase;  // ImageBase field in OptionalHeader
+	quint64           FileHash;   // Full module name hash
+	QString           FilePath;   // 完整路径, 包括文件名字和扩展名, 比如: c:\windows\ntdll.dll
+	QString           FileName;   // 文件名, 比如: ntdll.dll
+	QString           FileExt;    // 文件扩展名, 比如: dll
+	quint64           FileSize;   // 文件大小
 	quint64           MappingVA;
 	PIMAGE_NT_HEADERS ImageNtHeaders;
 	MODULE_PARTY      Party;

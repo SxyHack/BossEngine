@@ -68,7 +68,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>themes\dark\framelesswindow;themes\dark;.\;src\;.\src\core\provider;.\src\core;.\src\gui\scan;.\src\core\struct;.\src\core\model\cmd;.\src\gui\scan\controls;.\src\core\model;.\src\core\model\compare;.\src\settings;.\src\gui\config;.\src\core\debugger;.\src\core\process;.\src\core\global;.\src\core\module;.\src\core\tracker;.\src\core\thread;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>themes\dark\framelesswindow;themes\dark;.\;src\;.\src\core\provider;.\src\core;.\src\gui\scan;.\src\core\struct;.\src\core\model\cmd;.\src\gui\scan\controls;.\src\core\model;.\src\core\model\compare;.\src\settings;.\src\gui\config;.\src\core\debugger;.\src\core\process;.\src\core\global;.\src\core\module;.\src\core\tracker;.\src\core\thread;.\src\core\module2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <DisableSpecificWarnings>4828; 4005</DisableSpecificWarnings>
       <PreprocessorDefinitions>_AMD64_;_WIN64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -81,7 +81,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>themes\dark\framelesswindow;themes\dark;.\;src\;.\src\core\provider;.\src\core;.\src\gui\scan;.\src\core\struct;.\src\core\model\cmd;.\src\gui\scan\controls;.\src\core\model;.\src\core\model\compare;.\src\settings;.\src\gui\config;.\src\core\debugger;.\src\core\process;.\src\core\global;.\src\core\module;.\src\core\tracker;.\src\core\thread;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>themes\dark\framelesswindow;themes\dark;.\;src\;.\src\core\provider;.\src\core;.\src\gui\scan;.\src\core\struct;.\src\core\model\cmd;.\src\gui\scan\controls;.\src\core\model;.\src\core\model\compare;.\src\settings;.\src\gui\config;.\src\core\debugger;.\src\core\process;.\src\core\global;.\src\core\module;.\src\core\tracker;.\src\core\thread;.\src\core\module2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <DisableSpecificWarnings>4828</DisableSpecificWarnings>
     </ClCompile>
@@ -116,6 +116,7 @@
     <ClCompile Include="src\core\BEngine.cpp" />
     <ClCompile Include="src\core\debugger\Debugger.cpp" />
     <ClCompile Include="src\core\global\global.cpp" />
+    <ClCompile Include="src\core\module2\BEModule.cpp" />
     <ClCompile Include="src\core\module\EnumModuleWorker.cpp" />
     <ClCompile Include="src\core\module\MappingFile.cpp" />
     <ClCompile Include="src\core\memory\Memory.cpp" />
@@ -232,6 +233,8 @@
     <QtMoc Include="src\core\module\Module.h" />
     <QtMoc Include="src\core\module\ModuleSection.h" />
     <QtMoc Include="src\core\module\EnumModuleWorker.h" />
+    <QtMoc Include="src\core\module2\BEModule.h" />
+    <ClInclude Include="src\core\module2\module_types.h" />
     <ClInclude Include="src\core\module\ModuleExport.h" />
     <ClInclude Include="src\core\module\ModuleImport.h" />
     <ClInclude Include="src\core\module\ModuleRelocation.h" />

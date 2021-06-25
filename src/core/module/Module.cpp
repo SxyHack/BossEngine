@@ -16,7 +16,7 @@ Module::Module() : QObject(nullptr)
 , ModSize(0)
 , FileHash(0)
 , Entry(0)
-, ImageBaseHeader(0)
+, ImageBase(0)
 , MappingVA(0)
 , ImageNtHeaders(NULL)
 , Party(MODULE_PARTY::USER)
@@ -29,7 +29,7 @@ Module::Module(const Module& src) : QObject(nullptr)
 , ModSize(src.ModSize)
 , FileHash(src.FileHash)
 , Entry(src.Entry)
-, ImageBaseHeader(src.ImageBaseHeader)
+, ImageBase(src.ImageBase)
 , MappingVA(src.MappingVA)
 , ImageNtHeaders(src.ImageNtHeaders)
 , Party(src.Party)
@@ -99,7 +99,7 @@ NTSTATUS Module::InitImageNtHeader()
 		// Fix a problem where the OEP is set to zero (non-existent).
 		// OEP can't start at the PE header/offset 0 -- except if module is an EXE.
 		this->Entry = modOEP + ModBase;
-		this->ImageBaseHeader = (quint64)HEADER_FIELD(ImageNtHeaders, ImageBase);
+		this->ImageBase = (quint64)HEADER_FIELD(ImageNtHeaders, ImageBase);
 		if (modOEP == 0 && bIsDLL)
 		{
 			Entry = 0;

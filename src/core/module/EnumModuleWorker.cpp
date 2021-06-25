@@ -25,6 +25,7 @@ void EnumModuleWorker::Stop()
 	requestInterruption();
 	if (_ExitSemaphore.tryAcquire(1, 1000L))
 		_ExitSemaphore.release();
+
 	qInfo("Stopped");
 }
 

@@ -44,7 +44,6 @@ void BEThreadTracker::run()
 
 	while (!isInterruptionRequested())
 	{
-
 		//if (SuspendThread(hThread) == -1)
 		//{
 		//	CloseHandle(hThread);
@@ -67,21 +66,8 @@ void BEThreadTracker::run()
 		{
 			_LastRip = context.Rip;
 			_ListThreadFrame.append(context);
-
 			qDebug("线程[%d] RIP:%X", _Thread->ThreadID, _LastRip);
 		}
-
-		//if (_Thread->MapRip.contains(context.Rip))
-		//	continue;
-		//_Thread->MapRip.insert(context.Rip, context.Rip);
-		// 
-		//qDebug("线程[%d]RIP:%X", _Thread->ThreadID, _Thread->Context.Rip);
-		//QString qsLog = QString().sprintf("Thread-[%d] Counter:\n", _Thread->ThreadID);
-		//for (auto rip: _Thread->MapRip)
-		//{
-		//	qsLog += QString().sprintf("\t%X\n", rip);
-		//}
-		//qDebug(qsLog.toUtf8().data());
 
 		QThread::msleep(1);
 		//ResumeThread(hThread);
