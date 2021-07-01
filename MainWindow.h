@@ -23,6 +23,7 @@ protected:
 private slots:
     void OnActionOpenProcess(bool checked);
     void OnActionOpenConfig(bool checked);
+    void OnActionOpenMemory(bool checked);
 
     void OnMemoryScanning(qint64 scanned, qint64 total);
     void OnMemoryScanStarted();

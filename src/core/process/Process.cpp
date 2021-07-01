@@ -157,6 +157,17 @@ Module* Process::GetModule(int i)
 	return nullptr;
 }
 
+bool Process::GetModuleNameByAddr(quint64 address, QString& moduleName)
+{
+	if (_ModuleRangeMap.contains(QRange(address, address))) {
+		auto pModule = _ModuleRangeMap.value(QRange(address, address));
+		moduleName = pModule->FileName;
+		return true;
+	}
+
+	return false;
+}
+
 void Process::StartEnumModuleWorker()
 {
 	if (_EnumModule->isRunning())

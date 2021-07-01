@@ -157,6 +157,21 @@
     <ClCompile Include="src\core\module\EnumModuleWorker.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\core\module\BEModule.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\module\PE\PEParser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\module\PE\PESection.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\memory\BEMemoryEdit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\memory\BEMemoryEditDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="themes\dark\DarkStyle.h">
@@ -237,6 +252,18 @@
     <QtMoc Include="src\core\module\EnumModuleWorker.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="src\core\module\BEModule.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="src\core\module\PE\PESection.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="src\gui\memory\BEMemoryEdit.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="src\gui\memory\BEMemoryEditDialog.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="themes\dark\framelesswindow\framelesswindow.ui">
@@ -252,6 +279,9 @@
       <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="src\gui\config\ConfigurationScanWidget.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="src\gui\memory\BEMemoryEditDialog.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>
@@ -395,6 +425,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\core\module\ModuleRelocation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\module2\module_types.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\module\PE\PEParser.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

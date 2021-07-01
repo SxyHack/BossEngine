@@ -1,4 +1,4 @@
-#include "Memory.h"
+#include "BEMemory.h"
 #include "BEngine.h"
 
 
@@ -13,7 +13,14 @@ bool BEMemory::LoadPages(bool bListAll)
 	quint64 numBytes = 0;
 	quint64 ulQueryAddr = 0;
 	quint64 ulAllocationBase = 0;
-	HANDLE  hProcess = Engine.GetProcessHandle();
+	Process* pProcess = Engine.GetProcess();
+	if (pProcess == nullptr) 
+	{
+		qWarning("æ‰“å¼€è¿›ç¨‹å¤±è´¥");
+		return false;
+	}
+
+	HANDLE  hProcess = pProcess->Handle();
 	MEMORY_BASIC_INFORMATION mbi;
 	ZeroMemory(&mbi, sizeof(mbi));
 
@@ -37,10 +44,10 @@ bool BEMemory::LoadPages(bool bListAll)
 			if (bReserved)
 			{
 				page.desc = (quint64(page.mbi.BaseAddress) != ulAllocationBase)
-					? QString().sprintf("±£Áô (%p)", ulAllocationBase)
-					: "±£Áô";
+					? QString().sprintf("ä¿ç•™ (%p)", ulAllocationBase)
+					: "ä¿ç•™";
 			}
-			else if (false) // TODO: !ModNameFromAddr
+			else if (pProcess->GetModuleNameByAddr(ulQueryAddr, page.desc)) // TODO: !ModNameFromAddr
 			{
 				TCHAR szMappedName[MAX_MODULE_SIZE] = L"";
 				if (bMapped && (GetMappedFileName(hProcess, mbi.AllocationBase, szMappedName, MAX_MODULE_SIZE) != 0))

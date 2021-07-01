@@ -33,6 +33,13 @@ void MainWindow::SetupToolBar()
     actConfig->setToolTip("配置");
     ui.mainToolBar->addAction(actConfig);
     connect(actConfig, &QAction::triggered, this, &MainWindow::OnActionOpenConfig);
+
+    // 内存视图
+    QAction* actMemory = new QAction(QIcon(":/MAIN/resources/Icons/edit128x128.png"), tr("&Memory"), this);
+    actMemory->setStatusTip("显示内存视图");
+    actMemory->setToolTip("显示内存视图");
+    ui.mainToolBar->addAction(actMemory);
+    connect(actMemory, &QAction::triggered, this, &MainWindow::OnActionOpenMemory);
 }
 
 void MainWindow::SetupStatusBar()
@@ -99,6 +106,11 @@ void MainWindow::OnActionOpenConfig(bool checked)
 {
     ConfigurationDialog dialog;
     dialog.exec();
+}
+
+void MainWindow::OnActionOpenMemory(bool checked)
+{
+
 }
 
 void MainWindow::OnMemoryScanning(qint64 scanned, qint64 total)

@@ -11,18 +11,16 @@
 #include <QMap>
 #include <QFile>
 
-// Macros to safely access IMAGE_NT_HEADERS fields since the compile-time typedef of this struct may not match the actual file bitness.
-// Never access OptionalHeader.xx values directly unless they have the same size and offset on 32 and 64 bit. IMAGE_FILE_HEADER fields are safe to use
-#define IMAGE32(NtHeaders) ((NtHeaders) != nullptr && (NtHeaders)->OptionalHeader.Magic == IMAGE_NT_OPTIONAL_HDR32_MAGIC)
-#define IMAGE64(NtHeaders) ((NtHeaders) != nullptr && (NtHeaders)->OptionalHeader.Magic == IMAGE_NT_OPTIONAL_HDR64_MAGIC)
-#define HEADER_FIELD(NtHeaders, Field) (IMAGE64(NtHeaders) \
-    ? ((PIMAGE_NT_HEADERS64)(NtHeaders))->OptionalHeader.Field : (IMAGE32(NtHeaders) \
-        ? ((PIMAGE_NT_HEADERS32)(NtHeaders))->OptionalHeader.Field \
-        : 0))
-#define THUNK_VAL(NtHeaders, Ptr, Val) (IMAGE64(NtHeaders) \
-    ? ((PIMAGE_THUNK_DATA64)(Ptr))->Val : (IMAGE32(NtHeaders) \
-        ? ((PIMAGE_THUNK_DATA32)(Ptr))->Val \
-        : 0))
+//#define IMAGE32(NtHeaders) ((NtHeaders) != nullptr && (NtHeaders)->OptionalHeader.Magic == IMAGE_NT_OPTIONAL_HDR32_MAGIC)
+//#define IMAGE64(NtHeaders) ((NtHeaders) != nullptr && (NtHeaders)->OptionalHeader.Magic == IMAGE_NT_OPTIONAL_HDR64_MAGIC)
+//#define HEADER_FIELD(NtHeaders, Field) (IMAGE64(NtHeaders) \
+//    ? ((PIMAGE_NT_HEADERS64)(NtHeaders))->OptionalHeader.Field : (IMAGE32(NtHeaders) \
+//        ? ((PIMAGE_NT_HEADERS32)(NtHeaders))->OptionalHeader.Field \
+//        : 0))
+//#define THUNK_VAL(NtHeaders, Ptr, Val) (IMAGE64(NtHeaders) \
+//    ? ((PIMAGE_THUNK_DATA64)(Ptr))->Val : (IMAGE32(NtHeaders) \
+//        ? ((PIMAGE_THUNK_DATA32)(Ptr))->Val \
+//        : 0))
 
 class Process;
 

@@ -2,7 +2,7 @@
 
 #include <QObject>
 #include "module_types.h"
-#include "global.h"
+#include "PESection.h"
 
 class Process;
 
@@ -29,7 +29,23 @@ public:
 	QString           FileName;   // 文件名, 比如: ntdll.dll
 	QString           FileExt;    // 文件扩展名, 比如: dll
 	quint64           FileSize;   // 文件大小
+	quint64           FileMapBase;
+
+	MODULE_PARTY      Party;
+
+	// PE headers
+	PIMAGE_DOS_HEADER      ImageDosHeader;   // Dos Header
+	PIMAGE_NT_HEADERS      ImageNtHeaders;   // NT Headers
+	PIMAGE_FILE_HEADER     ImageFileHeader;
+	PIMAGE_OPTIONAL_HEADER ImageOptHeader;
+	PIMAGE_SECTION_HEADER  ImageFirstSection;
+	quint64                ImageBase;
+	PE_MACHINE             Machine;
+
+	// Sections
+	qint32                 NumberOfSections;
+	LIST_PESECTION         Sections;
 };
 
 
-Q_DECLARE_METATYPE(Module);
+Q_DECLARE_METATYPE(BEModule);

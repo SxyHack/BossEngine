@@ -68,7 +68,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>themes\dark\framelesswindow;themes\dark;.\;src\;.\src\core\provider;.\src\core;.\src\gui\scan;.\src\core\struct;.\src\core\model\cmd;.\src\gui\scan\controls;.\src\core\model;.\src\core\model\compare;.\src\settings;.\src\gui\config;.\src\core\debugger;.\src\core\process;.\src\core\global;.\src\core\module;.\src\core\tracker;.\src\core\thread;.\src\core\module2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>themes\dark\framelesswindow;themes\dark;.\;src\;.\src\core\provider;.\src\core;.\src\gui\scan;.\src\core\struct;.\src\core\model\cmd;.\src\gui\scan\controls;.\src\core\model;.\src\core\model\compare;.\src\settings;.\src\gui\config;.\src\core\debugger;.\src\core\process;.\src\core\global;.\src\core\module;.\src\core\tracker;.\src\core\thread;.\src\core\module2;.\src\core\module\PE;.\src\gui\memory;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <DisableSpecificWarnings>4828; 4005</DisableSpecificWarnings>
       <PreprocessorDefinitions>_AMD64_;_WIN64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -81,7 +81,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>themes\dark\framelesswindow;themes\dark;.\;src\;.\src\core\provider;.\src\core;.\src\gui\scan;.\src\core\struct;.\src\core\model\cmd;.\src\gui\scan\controls;.\src\core\model;.\src\core\model\compare;.\src\settings;.\src\gui\config;.\src\core\debugger;.\src\core\process;.\src\core\global;.\src\core\module;.\src\core\tracker;.\src\core\thread;.\src\core\module2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>themes\dark\framelesswindow;themes\dark;.\;src\;.\src\core\provider;.\src\core;.\src\gui\scan;.\src\core\struct;.\src\core\model\cmd;.\src\gui\scan\controls;.\src\core\model;.\src\core\model\compare;.\src\settings;.\src\gui\config;.\src\core\debugger;.\src\core\process;.\src\core\global;.\src\core\module;.\src\core\tracker;.\src\core\thread;.\src\core\module2;.\src\core\module\PE;.\src\gui\memory;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <DisableSpecificWarnings>4828</DisableSpecificWarnings>
     </ClCompile>
@@ -116,7 +116,7 @@
     <ClCompile Include="src\core\BEngine.cpp" />
     <ClCompile Include="src\core\debugger\Debugger.cpp" />
     <ClCompile Include="src\core\global\global.cpp" />
-    <ClCompile Include="src\core\module2\BEModule.cpp" />
+    <ClCompile Include="src\core\module\BEModule.cpp" />
     <ClCompile Include="src\core\module\EnumModuleWorker.cpp" />
     <ClCompile Include="src\core\module\MappingFile.cpp" />
     <ClCompile Include="src\core\memory\Memory.cpp" />
@@ -131,6 +131,8 @@
     <ClCompile Include="src\core\module\ModuleImport.cpp" />
     <ClCompile Include="src\core\module\ModuleRelocation.cpp" />
     <ClCompile Include="src\core\module\ModuleSection.cpp" />
+    <ClCompile Include="src\core\module\PE\PEParser.cpp" />
+    <ClCompile Include="src\core\module\PE\PESection.cpp" />
     <ClCompile Include="src\core\process\Process.cpp">
       <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">input</DynamicSource>
       <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).moc</QtMocFileName>
@@ -144,6 +146,8 @@
     <ClCompile Include="src\core\thread\EnumThreadWorker.cpp" />
     <ClCompile Include="src\gui\config\ConfigurationDialog.cpp" />
     <ClCompile Include="src\gui\config\ConfigurationScanWidget.cpp" />
+    <ClCompile Include="src\gui\memory\BEMemoryEdit.cpp" />
+    <ClCompile Include="src\gui\memory\BEMemoryEditDialog.cpp" />
     <ClCompile Include="src\gui\process\ProcessAttachDialog.cpp" />
     <ClCompile Include="src\gui\scan\controls\BEHeaderView.cpp" />
     <ClCompile Include="src\gui\scan\ScanTabPage.cpp" />
@@ -165,6 +169,7 @@
     <ClCompile Include="main.cpp" />
     <QtUic Include="src\gui\config\ConfigurationDialog.ui" />
     <QtUic Include="src\gui\config\ConfigurationScanWidget.ui" />
+    <QtUic Include="src\gui\memory\BEMemoryEditDialog.ui" />
     <QtUic Include="src\gui\process\ProcessAttachDialog.ui" />
     <QtUic Include="src\gui\scan\ScanTabPage.ui" />
     <QtUic Include="themes\dark\framelesswindow\framelesswindow.ui" />
@@ -233,19 +238,23 @@
     <QtMoc Include="src\core\module\Module.h" />
     <QtMoc Include="src\core\module\ModuleSection.h" />
     <QtMoc Include="src\core\module\EnumModuleWorker.h" />
-    <QtMoc Include="src\core\module2\BEModule.h" />
+    <QtMoc Include="src\core\module\BEModule.h" />
     <ClInclude Include="src\core\module2\module_types.h" />
     <ClInclude Include="src\core\module\ModuleExport.h" />
     <ClInclude Include="src\core\module\ModuleImport.h" />
     <ClInclude Include="src\core\module\ModuleRelocation.h" />
     <ClInclude Include="src\core\module\module_types.h" />
     <QtMoc Include="src\core\process\Process.h" />
+    <ClInclude Include="src\core\module\PE\PEParser.h" />
+    <QtMoc Include="src\core\module\PE\PESection.h" />
     <ClInclude Include="src\core\symbol\symbol_types.h" />
     <ClInclude Include="src\core\symbol\symbol_undecorator.h" />
     <ClInclude Include="src\core\global\global.h" />
     <QtMoc Include="src\core\thread\BEThread.h" />
     <QtMoc Include="src\core\thread\EnumThreadWorker.h" />
     <QtMoc Include="src\core\thread\BEThreadTracker.h" />
+    <QtMoc Include="src\gui\memory\BEMemoryEdit.h" />
+    <QtMoc Include="src\gui\memory\BEMemoryEditDialog.h" />
     <ClInclude Include="src\settings\ScanSettings.h" />
     <ClInclude Include="src\undocument.h" />
     <ClInclude Include="src\utility\JsonMaker.h" />

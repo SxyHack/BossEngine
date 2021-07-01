@@ -54,6 +54,7 @@ public:
 	bool ModuleIsExist(const QString& name);
 	quint64 GetModuleCount();
 	Module* GetModule(int i);
+	bool GetModuleNameByAddr(quint64 address, QString& moduleName);
 	void StartEnumModuleWorker();
 	//
 	// Threads
